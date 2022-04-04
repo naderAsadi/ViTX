@@ -224,10 +224,10 @@ class ResNet(nn.Module):
 
 
 def load_state_dict_from_url(model_name: str, model_url: str):
-    if not os.path.exists('../snapshots/'):
-        os.mkdir('../snapshots/')
+    if not os.path.exists('./snapshots/'):
+        os.mkdir('./snapshots/')
 
-    local_file = f"../snapshots/{model_name}.pt"
+    local_file = f"./snapshots/{model_name}.pt"
 
     if not os.path.exists(local_file):
         print(f"{model_name} weights not found. Downloading from torch hub...")
