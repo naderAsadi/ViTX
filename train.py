@@ -9,6 +9,10 @@ from transformers import (
 )
 
 from vision_text.models import VisionTextModel
+from vision_text.config import config_parser
+
+
+config = config_parser(config_path='./configs/', config_name="default", job_name="test")
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

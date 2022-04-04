@@ -13,7 +13,7 @@ class VisionTextModel(VisionTextDualEncoderModel):
         vision_model,
         text_model
     ):
-        super().__init__(config=config, vision_model=vision_model, text_model=text_model)
+        super().__init__(config=None, vision_model=vision_model, text_model=text_model)
 
     def _forward_vision_model(
         self,
