@@ -7,12 +7,26 @@ from typing import Dict, List, Optional, Tuple
 
 
 """ Model Configs """
-
 @dataclass
 class VisionModelConfig:
-    name: str = "resnet50"
+    name: str = "google/vit-base-patch16-224"
     pretrained: bool = True
-    projection_size: int = 512
+    embed_dim: int = 768
+
+@dataclass
+class TextModelConfig:
+    name: str = "bert-base-uncased"
+    pretrained: bool = True
+    embed_dim: int = 768
+
+@dataclass
+class ModelConfig:
+    vision_model: VisionModelConfig = VisionModelConfig()
+    text_model: TextModelConfig = TextModelConfig()
+    projection_dim: int = 512
+    logit_scale_init_value: float = 2.6592
+    return_dict: bool = True
+
 
 """ Method Configs """
 
@@ -27,5 +41,5 @@ class OptimConfig:
 """ Root Config """
 @dataclass
 class Config:
-    vision_model: VisionModelConfig = VisionModelConfig()
+    model: ModelConfig = ModelConfig()
     optim: OptimConfig = OptimConfig()

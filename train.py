@@ -20,10 +20,11 @@ tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 feature_extractor = ViTFeatureExtractor.from_pretrained("google/vit-base-patch16-224")
 processor = VisionTextDualEncoderProcessor(feature_extractor, tokenizer)
 
-model = VisionTextModel.from_vision_text_pretrained(
-    vision_model_name_or_path="google/vit-base-patch16-224", 
-    text_model_name_or_path="bert-base-uncased"
-)
+# model = VisionTextModel.from_vision_text_pretrained(
+#     vision_model_name_or_path="google/vit-base-patch16-224", 
+#     text_model_name_or_path="bert-base-uncased"
+# )
+model = VisionTextModel(model_config=config.model)
 model.to(device)
 
 optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
@@ -54,7 +55,7 @@ for i in range(200):
     loss.backward()
     optimizer.step()
 
-    # print(f"Loss: {loss.item()} Similarity: {logits_per_image.cpu().detach().numpy().reshape(-1)}", end='\r')
+    print(f"Loss: {loss.item()} Similarity: {logits_per_image.cpu().detach().numpy().reshape(-1)}", end='\r')
 
 
 # save and load from pretrained

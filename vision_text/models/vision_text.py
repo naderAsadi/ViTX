@@ -1,19 +1,53 @@
+from typing import Optional
 import torch
-from transformers import VisionTextDualEncoderModel
-from transformers.models.clip.modeling_clip import CLIPOutput, CLIPVisionConfig, CLIPVisionModel
+import torch.nn as nn
 
+from transformers import AutoModel, VisionTextDualEncoderModel
+from transformers.models.clip.modeling_clip import CLIPOutput
+
+from..config import ModelConfig
 from ..losses import clip_loss
 
 
-class VisionTextModel(VisionTextDualEncoderModel):
+class VisionTextModel(torch.nn.Module):
 
     def __init__(
         self,
-        config,
-        vision_model,
-        text_model
+        model_config: ModelConfig,
+        vision_model: Optional[nn.Module] = None,
+        text_model: Optional[nn.Module] = None
     ):
-        super().__init__(config=None, vision_model=vision_model, text_model=text_model)
+        # super().__init__(config=None, vision_model=vision_model, text_model=text_model)
+        super(VisionTextModel, self).__init__()
+        self.config = model_config
+
+        if vision_model is None:
+            if self.config.vision_model.name is None:
+                raise ValueError(
+                    "If `vision_model` is not passed as an argument, vision model `name` should be defined in the config under `model.vision_model`"
+                )
+            vision_model = AutoModel.from_pretrained(pretrained_model_name_or_path=self.config.vision_model.name)
+
+        if text_model is None:
+            if self.config.text_model.name is None:
+                raise ValueError(
+                    "If `text_model` is not passed as an argument, text model `name` should be defined in the config under `model.text_model`"
+                )
+            text_model = AutoModel.from_pretrained(pretrained_model_name_or_path=self.config.text_model.name)
+
+        # Models
+        self.text_model = text_model
+        self.vision_model = vision_model
+
+        # Embedding dimensions
+        self.vision_embed_dim = self.config.vision_model.embed_dim
+        self.text_embed_dim = self.config.text_model.embed_dim
+        self.projection_dim = self.config.projection_dim
+
+        # Heads
+        self.visual_projection = nn.Linear(self.vision_embed_dim, self.projection_dim, bias=False)
+        self.text_projection = nn.Linear(self.text_embed_dim, self.projection_dim, bias=False)
+        self.logit_scale = nn.Parameter(torch.ones([]) * self.config.logit_scale_init_value)
 
     def _forward_vision_model(
         self,
@@ -48,16 +82,46 @@ class VisionTextModel(VisionTextDualEncoderModel):
             applying the projection layer to the pooled output of [`CLIPVisionModel`].
         """
         vision_outputs = self._forward_vision_model(
-            pixel_values,
-            output_attentions,
-            output_hidden_states,
-            return_dict
+            pixel_values=pixel_values,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+            return_dict=return_dict
         )
 
         pooled_output = vision_outputs['pooler_output']  # pooled_output
         image_features = self.visual_projection(pooled_output)
 
         return image_features
+
+    def get_text_features(
+        self,
+        input_ids=None,
+        attention_mask=None,
+        position_ids=None,
+        token_type_ids=None,
+        output_attentions=None,
+        output_hidden_states=None,
+        return_dict=None,
+    ):
+        r"""
+        Returns:
+            text_features (`torch.FloatTensor` of shape `(batch_size, output_dim`): The text embeddings obtained by
+            applying the projection layer to the pooled output of [`CLIPTextModel`].
+        """
+        text_outputs = self.text_model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            token_type_ids=token_type_ids,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+            return_dict=return_dict,
+        )
+
+        pooled_output = text_outputs[1]
+        text_features = self.text_projection(pooled_output)
+
+        return text_features
 
     def forward(
         self,
@@ -72,15 +136,13 @@ class VisionTextModel(VisionTextDualEncoderModel):
         return_dict=None,
     ):
 
-        # print(self.vision_model)
-
         return_dict = return_dict if return_dict is not None else self.config.return_dict
 
         vision_outputs = self._forward_vision_model(
-            pixel_values,
-            output_attentions,
-            output_hidden_states,
-            return_dict
+            pixel_values=pixel_values,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+            return_dict=return_dict
         )
 
         text_outputs = self.text_model(
@@ -95,8 +157,6 @@ class VisionTextModel(VisionTextDualEncoderModel):
 
         image_embeds = vision_outputs['pooler_output']  # pooler_output
         image_embeds = self.visual_projection(image_embeds)
-
-        print(str(type(self.vision_model)), vision_outputs.keys(), image_embeds.shape)
 
         text_embeds = text_outputs[1]  # pooler_output
         text_embeds = self.text_projection(text_embeds)
