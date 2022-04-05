@@ -5,7 +5,7 @@ import torch.nn as nn
 from transformers import AutoModel, VisionTextDualEncoderModel
 from transformers.models.clip.modeling_clip import CLIPOutput
 
-from..config import ModelConfig
+from ..config import ModelConfig
 from ..losses import clip_loss
 
 
@@ -17,8 +17,8 @@ class VisionTextModel(torch.nn.Module):
         vision_model: Optional[nn.Module] = None,
         text_model: Optional[nn.Module] = None
     ):
-        # super().__init__(config=None, vision_model=vision_model, text_model=text_model)
         super(VisionTextModel, self).__init__()
+
         self.config = model_config
 
         if vision_model is None:
@@ -154,6 +154,8 @@ class VisionTextModel(torch.nn.Module):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
         )
+
+        print(f"{vision_outputs.last_hidden_state.shape, text_outputs.last_hidden_state.shape}")
 
         image_embeds = vision_outputs['pooler_output']  # pooler_output
         image_embeds = self.visual_projection(image_embeds)

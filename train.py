@@ -55,7 +55,7 @@ for i in range(200):
     loss.backward()
     optimizer.step()
 
-    print(f"Loss: {loss.item()} Similarity: {logits_per_image.cpu().detach().numpy().reshape(-1)}", end='\r')
+    # print(f"Loss: {loss.item()} Similarity: {logits_per_image.cpu().detach().numpy().reshape(-1)}", end='\r')
 
 
 # save and load from pretrained
