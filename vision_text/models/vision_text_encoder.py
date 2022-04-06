@@ -3,8 +3,8 @@ import torch
 import torch.nn as nn
 
 from transformers import AutoModel, VisionTextDualEncoderModel
-from transformers.models.clip.modeling_clip import CLIPOutput
 
+from .utils import VisionTextOutput
 from ..config import ModelConfig
 from ..losses import clip_loss
 
@@ -51,10 +51,10 @@ class VisionTextModel(torch.nn.Module):
 
     def _forward_vision_model(
         self,
-        pixel_values=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
+        pixel_values: torch.Tensor,
+        output_attentions: Optional[torch.Tensor] = None,
+        output_hidden_states: Optional[torch.Tensor] = None,
+        return_dict: Optional[bool] = None
     ):
         vision_outputs = {}
         if 'transformers' in str(type(self.vision_model)):
@@ -71,10 +71,10 @@ class VisionTextModel(torch.nn.Module):
 
     def get_image_features(
         self,
-        pixel_values=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
+        pixel_values: torch.Tensor,
+        output_attentions: Optional[torch.Tensor] = None,
+        output_hidden_states: Optional[torch.Tensor] = None,
+        return_dict: Optional[bool] = None
     ):
         r"""
         Returns:
@@ -95,7 +95,7 @@ class VisionTextModel(torch.nn.Module):
 
     def get_text_features(
         self,
-        input_ids=None,
+        input_ids,
         attention_mask=None,
         position_ids=None,
         token_type_ids=None,
@@ -125,15 +125,15 @@ class VisionTextModel(torch.nn.Module):
 
     def forward(
         self,
-        input_ids=None,
-        pixel_values=None,
-        attention_mask=None,
-        position_ids=None,
-        return_loss=None,
-        token_type_ids=None,
-        output_attentions=None,
-        output_hidden_states=None,
-        return_dict=None,
+        input_ids,
+        pixel_values,
+        attention_mask = None,
+        position_ids = None,
+        return_loss = None,
+        token_type_ids = None,
+        output_attentions = None,
+        output_hidden_states = None,
+        return_dict = None,
     ):
 
         return_dict = return_dict if return_dict is not None else self.config.return_dict
@@ -180,12 +180,12 @@ class VisionTextModel(torch.nn.Module):
             output = (logits_per_image, logits_per_text, text_embeds, image_embeds, text_outputs, vision_outputs)
             return ((loss,) + output) if loss is not None else output
 
-        return CLIPOutput(
+        return VisionTextOutput(
             loss=loss,
+            vision_pooled_embeds=image_embeds,
+            text_pooled_embeds=text_embeds,
+            vision_model_output=vision_outputs,
+            text_model_output=text_outputs,
             logits_per_image=logits_per_image,
             logits_per_text=logits_per_text,
-            text_embeds=text_embeds,
-            image_embeds=image_embeds,
-            text_model_output=text_outputs,
-            vision_model_output=vision_outputs,
         )

@@ -4,6 +4,8 @@ import requests
 import torch
 import torch.nn as nn
 
+from .utils import VisionOutput
+
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
            'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
@@ -217,13 +219,22 @@ class ResNet(nn.Module):
         pooled_x = self.avgpool(x)
         pooled_x = torch.flatten(pooled_x, 1)
 
-        return pooled_x, x
+        return VisionOutput(
+            vision_pooled_embeds=pooled_x,
+            vision_model_output=x
+        )
+
 
     def forward(self, x):
-        x = self.return_hidden(x)
-        logits = self.fc(x)
+        model_output = self.return_hidden(x)
+        pooled_embeds, hidden_output = model_output.image_pooled_embeds, model_output.vision_model_output
+        logits = self.fc(pooled_embeds)
 
-        return logits
+        return VisionOutput(
+            vision_pooled_embeds=pooled_embeds,
+            vision_model_output=hidden_output,
+            logits=logits
+        )
 
 
 def load_state_dict_from_url(model_name: str, model_url: str):

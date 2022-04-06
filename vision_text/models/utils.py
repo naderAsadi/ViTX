@@ -1,0 +1,30 @@
+from dataclasses import dataclass
+from typing import Any, ContextManager, List, Optional, Tuple
+
+import torch
+
+
+@dataclass
+class VisionOutput:
+    loss: Optional[torch.FloatTensor] = None
+    vision_pooled_embeds: torch.FloatTensor = None
+    vision_model_output: torch.FloatTensor = None
+    logits: Optional[torch.FloatTensor] = None
+
+
+@dataclass
+class TextOutput:
+    loss: Optional[torch.FloatTensor] = None
+    text_pooled_embeds: torch.FloatTensor = None
+    text_model_output: torch.FloatTensor = None
+
+
+@dataclass
+class VisionTextOutput:
+    loss: Optional[torch.FloatTensor] = None
+    vision_pooled_embeds: torch.FloatTensor = None
+    text_pooled_embeds: torch.FloatTensor = None
+    vision_model_output: torch.FloatTensor = None
+    text_model_output: torch.FloatTensor = None
+    logits_per_image: Optional[torch.FloatTensor] = None,
+    logits_per_text: Optional[torch.FloatTensor] = None,

@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .utils import VisionTextOutput
 
 
 class AttentionPool2d(nn.Module):
@@ -184,4 +185,9 @@ class MultiModalTransformer(nn.Module):
             pooled_vision_output = pooled_vision_output @ self.vision_projection
             pooled_text_output = pooled_text_output @ self.text_projection
 
-        return pooled_vision_output, pooled_text_output
+        return VisionTextOutput(
+            vision_pooled_embeds=pooled_vision_output,
+            text_pooled_embeds=pooled_text_output,
+            vision_model_output=x[:, :self.seq_size + 1, :],
+            text_model_output=x[:, self.seq_size + 1:, :]
+        )
