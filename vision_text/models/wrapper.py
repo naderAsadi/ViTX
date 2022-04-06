@@ -25,7 +25,7 @@ class ModelWrapper(nn.Module):
     def forward_trunk_vision_model(self, data):
         if not isinstance(self.trunk, VisionTextModel):
             raise ValueError(
-                f"trunk model is not an instance of VisionTextModel"
+                f"trunk model is not an instance of VisionTextModel, use `.forward_trunk` method instead."
             )
         
         return self.trunk.get_image_features(*data)
@@ -33,7 +33,7 @@ class ModelWrapper(nn.Module):
     def forward_trunk_text_model(self, data):
         if not isinstance(self.trunk, VisionTextModel):
             raise ValueError(
-                f"trunk model is not an instance of VisionTextModel"
+                f"trunk model is not an instance of VisionTextModel, use `.forward_trunk` method instead."
             )
         
         return self.trunk.get_text_features(*data)
