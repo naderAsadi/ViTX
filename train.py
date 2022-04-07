@@ -69,7 +69,7 @@ def train():
     )
     train_loader = DataLoader(
         coco_train_dataset,
-        batch_size=16,
+        batch_size=32,
         num_workers=8,
         shuffle=True,
         collate_fn=collate_fn,
