@@ -49,6 +49,9 @@ class VisionTextModel(torch.nn.Module):
         self.text_projection = nn.Linear(self.text_embed_dim, self.projection_dim, bias=False)
         self.logit_scale = nn.Parameter(torch.ones([]) * self.config.logit_scale_init_value)
 
+    def from_pretrained(self, model_config: ModelConfig):
+        pass
+
     def _forward_vision_model(
         self,
         pixel_values: torch.Tensor,
@@ -154,8 +157,6 @@ class VisionTextModel(torch.nn.Module):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
         )
-
-        print(f"{vision_outputs.last_hidden_state.shape, text_outputs.last_hidden_state.shape}")
 
         image_embeds = vision_outputs['pooler_output']  # pooler_output
         image_embeds = self.visual_projection(image_embeds)
