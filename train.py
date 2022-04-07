@@ -14,6 +14,13 @@ from transformers import (
     ViTFeatureExtractor,
     BertTokenizer,
 )
+from transformers import (
+    CLIPVisionModel,
+    CLIPTextModel,
+    CLIPFeatureExtractor,
+    CLIPTokenizer,
+    CLIPProcessor
+)
 
 from vision_text.models import VisionTextModel
 from vision_text.config import config_parser
@@ -27,11 +34,18 @@ def train():
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-    feature_extractor = ViTFeatureExtractor.from_pretrained("google/vit-base-patch16-224")
-    processor = VisionTextDualEncoderProcessor(feature_extractor, tokenizer)
+    # tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    # feature_extractor = ViTFeatureExtractor.from_pretrained("google/vit-base-patch16-224")
+    # processor = VisionTextDualEncoderProcessor(feature_extractor, tokenizer)
 
-    model = VisionTextModel(model_config=config.model)
+    # tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-base-patch32")
+    # feature_extractor = CLIPFeatureExtractor.from_pretrained("openai/clip-vit-base-patch32")
+    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+    vision_model = CLIPVisionModel.from_pretrained("openai/clip-vit-base-patch32")
+    text_model = CLIPTextModel.from_pretrained("openai/clip-vit-base-patch32")
+
+    model = VisionTextModel(model_config=config.model, vision_model=vision_model, text_model=text_model)
+    # model = VisionTextModel(model_config=config.model)
     model.to(device)
 
     optimizer = torch.optim.SGD(model.parameters(), lr=5e-3, momentum=0.9, weight_decay=1e-4)
@@ -55,7 +69,7 @@ def train():
     )
     train_loader = DataLoader(
         coco_train_dataset,
-        batch_size=2,
+        batch_size=16,
         num_workers=8,
         shuffle=True,
         collate_fn=collate_fn,

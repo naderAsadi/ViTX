@@ -17,7 +17,7 @@ class VisionModelConfig:
 class TextModelConfig:
     name: str = "bert-base-uncased"
     pretrained: bool = True
-    embed_dim: int = 768
+    embed_dim: int = 512 #768
 
 @dataclass
 class ModelConfig:
