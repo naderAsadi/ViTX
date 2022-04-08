@@ -22,10 +22,10 @@ from vision_text.methods import CLIP
 def collate_fn(batch):
     return tuple(zip(*batch))
 
-def get_train_loader():
+def get_train_loader(config):
     # loading data
-    train_data_path = "../datasets/coco-caption/images/train2014/"
-    train_ann_path = "../datasets/coco-caption/annotations/captions_train2014.json"
+    train_data_path = config.data.path + "/images/train2014/"
+    train_ann_path = config.data.path + "/annotations/captions_train2014.json"
 
     transform_train = T.Compose(
         [
@@ -58,7 +58,7 @@ def train():
     text_model = CLIPTextModel.from_pretrained(config.model.text_model.name)
     model = VisionTextModel(model_config=config.model, vision_model=vision_model, text_model=text_model)
 
-    train_loader = get_train_loader()
+    train_loader = get_train_loader(config)
     
     clip_method = CLIP(config, trunk=model)
     trainer = pl.Trainer(accelerator="gpu", devices=1)

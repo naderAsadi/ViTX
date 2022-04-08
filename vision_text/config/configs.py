@@ -3,7 +3,10 @@ from typing import Dict, List, Optional, Tuple
 
 
 """ Data Configs """
-
+@dataclass
+class DataConfig:
+    dataset: str = "coco"
+    path: str = "../datasets/coco-caption"
 
 
 """ Model Configs """
@@ -41,5 +44,6 @@ class OptimConfig:
 """ Root Config """
 @dataclass
 class Config:
+    data: DataConfig = DataConfig()
     model: ModelConfig = ModelConfig()
     optim: OptimConfig = OptimConfig()
