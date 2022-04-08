@@ -38,7 +38,7 @@ def train():
     # feature_extractor = ViTFeatureExtractor.from_pretrained("google/vit-base-patch16-224")
     # processor = VisionTextDualEncoderProcessor(feature_extractor, tokenizer)
 
-    # tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-base-patch32")
+    tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-base-patch32")
     # feature_extractor = CLIPFeatureExtractor.from_pretrained("openai/clip-vit-base-patch32")
     processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
     vision_model = CLIPVisionModel.from_pretrained("openai/clip-vit-base-patch32")
@@ -75,13 +75,18 @@ def train():
         collate_fn=collate_fn,
     )
 
+    model.train()
     n_epochs = 30
     for epoch in range(n_epochs):
+        sum_loss = 0
         for i, (images, captions) in enumerate(train_loader):
 
             text = []
             for cap in captions:
                 text.append(random.choice(cap))
+        
+            tokens = tokenizer(text)
+            print(tokens.keys())
 
             inputs = processor(
                 text=text, images=images, return_tensors="pt", padding=True
@@ -93,7 +98,7 @@ def train():
             optimizer.zero_grad()
             outputs = model(
                 input_ids=inputs.input_ids,
-                attention_mask=inputs.attention_mask,
+                attention_mask=None,
                 pixel_values=inputs.pixel_values,
                 return_loss=True,
             )
@@ -101,8 +106,10 @@ def train():
             loss.backward()
             optimizer.step()
 
+            sum_loss += loss.item()
             print(f"Epoch: {epoch}/{n_epochs} Iter: {i}/{len(train_loader)} Loss: {loss.item()}", end='\r') #Similarity: {logits_per_image.cpu().detach().numpy().reshape(-1)}"
 
+        print(f"Avg Loss: {sum_loss / n_epochs}")
 
     # save and load from pretrained
     # model.save_pretrained("vit-bert")

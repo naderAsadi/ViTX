@@ -9,13 +9,13 @@ from typing import Dict, List, Optional, Tuple
 """ Model Configs """
 @dataclass
 class VisionModelConfig:
-    name: str = "google/vit-base-patch16-224"
+    name: str = "openai/clip-vit-base-patch32" #google/vit-base-patch16-224
     pretrained: bool = True
     embed_dim: int = 768
 
 @dataclass
 class TextModelConfig:
-    name: str = "bert-base-uncased"
+    name: str = "openai/clip-vit-base-patch32" #bert-base-uncased
     pretrained: bool = True
     embed_dim: int = 512 #768
 
