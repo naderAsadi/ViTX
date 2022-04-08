@@ -6,7 +6,7 @@ from transformers import AutoModel, VisionTextDualEncoderModel
 
 from .utils import VisionTextOutput
 from ..config import ModelConfig
-from ..losses import clip_loss
+from ..losses import clip_loss, cosine_similarity
 
 
 class VisionTextModel(torch.nn.Module):
@@ -57,7 +57,6 @@ class VisionTextModel(torch.nn.Module):
         pixel_values: torch.Tensor,
         output_attentions: Optional[torch.Tensor] = None,
         output_hidden_states: Optional[torch.Tensor] = None,
-        return_dict: Optional[bool] = None
     ):
         vision_outputs = {}
         if 'transformers' in str(type(self.vision_model)):
@@ -65,7 +64,7 @@ class VisionTextModel(torch.nn.Module):
                 pixel_values=pixel_values,
                 output_attentions=output_attentions,
                 output_hidden_states=output_hidden_states,
-                return_dict=return_dict,
+                return_dict=True,
             )
         else:
             vision_outputs['pooler_output'], vision_outputs['last_hidden_state'] = self.vision_model.return_hidden(pixel_values)
@@ -77,7 +76,6 @@ class VisionTextModel(torch.nn.Module):
         pixel_values: torch.Tensor,
         output_attentions: Optional[torch.Tensor] = None,
         output_hidden_states: Optional[torch.Tensor] = None,
-        return_dict: Optional[bool] = None
     ):
         r"""
         Returns:
@@ -88,7 +86,6 @@ class VisionTextModel(torch.nn.Module):
             pixel_values=pixel_values,
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
-            return_dict=return_dict
         )
 
         pooled_output = vision_outputs['pooler_output']  # pooled_output
@@ -104,7 +101,6 @@ class VisionTextModel(torch.nn.Module):
         token_type_ids=None,
         output_attentions=None,
         output_hidden_states=None,
-        return_dict=None,
     ):
         r"""
         Returns:
@@ -115,10 +111,9 @@ class VisionTextModel(torch.nn.Module):
             input_ids=input_ids,
             attention_mask=attention_mask,
             position_ids=position_ids,
-            # token_type_ids=token_type_ids,
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
-            return_dict=return_dict,
+            return_dict=True,
         )
 
         pooled_output = text_outputs[1]
@@ -135,27 +130,21 @@ class VisionTextModel(torch.nn.Module):
         return_loss = None,
         token_type_ids = None,
         output_attentions = None,
-        output_hidden_states = None,
-        return_dict = None,
+        output_hidden_states = None
     ):
-
-        return_dict = return_dict if return_dict is not None else self.config.return_dict
 
         vision_outputs = self._forward_vision_model(
             pixel_values=pixel_values,
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
-            return_dict=return_dict
         )
 
         text_outputs = self.text_model(
             input_ids=input_ids,
             attention_mask=attention_mask,
-            # token_type_ids=token_type_ids,
             position_ids=position_ids,
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
-            return_dict=return_dict,
         )
 
         image_embeds = vision_outputs['pooler_output']  # pooler_output
@@ -169,20 +158,13 @@ class VisionTextModel(torch.nn.Module):
         text_embeds = text_embeds / text_embeds.norm(dim=-1, keepdim=True)
 
         # cosine similarity as logits
-        logit_scale = self.logit_scale.exp()
-        logits_per_text = torch.matmul(text_embeds, image_embeds.t()) * logit_scale
-        logits_per_image = logits_per_text.T
-
-        loss = None
-        if return_loss:
-            loss = clip_loss(logits_per_text)
-
-        if not return_dict:
-            output = (logits_per_image, logits_per_text, text_embeds, image_embeds, text_outputs, vision_outputs)
-            return ((loss,) + output) if loss is not None else output
+        logits_per_text, logits_per_image = cosine_similarity(
+            text_embeds=text_embeds, 
+            image_embeds=image_embeds, 
+            logit_scale=self.logit_scale
+        )
 
         return VisionTextOutput(
-            loss=loss,
             vision_pooled_embeds=image_embeds,
             text_pooled_embeds=text_embeds,
             vision_model_output=vision_outputs,

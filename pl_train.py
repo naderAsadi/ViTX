@@ -11,10 +11,7 @@ import pytorch_lightning as pl
 
 from transformers import (
     CLIPVisionModel,
-    CLIPTextModel,
-    CLIPFeatureExtractor,
-    CLIPTokenizer,
-    CLIPProcessor
+    CLIPTextModel
 )
 
 from vision_text.models import VisionTextModel
@@ -25,15 +22,7 @@ from vision_text.methods import CLIP
 def collate_fn(batch):
     return tuple(zip(*batch))
 
-def train():
-    config = config_parser(config_path='./configs/', config_name="default", job_name="test")
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    vision_model = CLIPVisionModel.from_pretrained("openai/clip-vit-base-patch32")
-    text_model = CLIPTextModel.from_pretrained("openai/clip-vit-base-patch32")
-    model = VisionTextModel(model_config=config.model, vision_model=vision_model, text_model=text_model)
-
+def get_train_loader():
     # loading data
     train_data_path = "../datasets/coco-caption/images/train2014/"
     train_ann_path = "../datasets/coco-caption/annotations/captions_train2014.json"
@@ -59,6 +48,17 @@ def train():
         collate_fn=collate_fn,
     )
 
+    return train_loader
+
+
+def train():
+    config = config_parser(config_path='./configs/', config_name="default", job_name="test")
+
+    vision_model = CLIPVisionModel.from_pretrained(config.model.vision_model.name)
+    text_model = CLIPTextModel.from_pretrained(config.model.text_model.name)
+    model = VisionTextModel(model_config=config.model, vision_model=vision_model, text_model=text_model)
+
+    train_loader = get_train_loader()
     
     clip_method = CLIP(config, trunk=model)
     trainer = pl.Trainer(accelerator="gpu", devices=1)
