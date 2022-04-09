@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Tuple
 class DataConfig:
     dataset: str = "coco"
     path: str = "../datasets/coco-caption"
+    n_workers: int = 8
 
 
 """ Model Configs """
@@ -19,6 +20,7 @@ class VisionModelConfig:
 @dataclass
 class TextModelConfig:
     name: str = "openai/clip-vit-base-patch32" #bert-base-uncased
+    tokenizer: str = 'openai/clip-vit-base-patch32'
     pretrained: bool = True
     embed_dim: int = 512 #768
 

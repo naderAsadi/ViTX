@@ -19,7 +19,7 @@ class CLIP(BaseMethod):
     ):
         super().__init__(config, trunk)
 
-        self.tokenizer = CLIPTokenizer.from_pretrained(self.config.model.text_model.name)
+        self.tokenizer = CLIPTokenizer.from_pretrained(self.config.model.text_model.tokenizer)
 
     def _compute_loss(
         self, 
