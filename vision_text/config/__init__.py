@@ -4,5 +4,5 @@ from .configs import (
     ModelConfig, 
     TextModelConfig, 
     VisionModelConfig, 
-    OptimConfig
+    TrainConfig
 )

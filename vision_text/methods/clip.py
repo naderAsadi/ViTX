@@ -50,7 +50,7 @@ class CLIP(BaseMethod):
         )
 
         loss = self._compute_loss(outputs)
-        self.log("train_loss", loss)
+        self.log("train/loss", loss)
 
         return loss
 

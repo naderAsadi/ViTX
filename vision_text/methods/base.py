@@ -28,9 +28,9 @@ class BaseMethod(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.SGD(
             self.trunk.parameters(), 
-            lr=self.config.optim.lr,
-            momentum=self.config.optim.momentum,
-            weight_decay=self.config.optim.weight_decay
+            lr=self.config.train.lr,
+            momentum=self.config.train.momentum,
+            weight_decay=self.config.train.weight_decay
         )
         return optimizer
 

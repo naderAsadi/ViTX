@@ -17,12 +17,14 @@ class VisionModelConfig:
     pretrained: bool = True
     embed_dim: int = 768
 
+
 @dataclass
 class TextModelConfig:
     name: str = "openai/clip-vit-base-patch32" #bert-base-uncased
     tokenizer: str = 'openai/clip-vit-base-patch32'
     pretrained: bool = True
     embed_dim: int = 512 #768
+
 
 @dataclass
 class ModelConfig:
@@ -33,11 +35,11 @@ class ModelConfig:
     return_dict: bool = True
 
 
-""" Method Configs """
-
 @dataclass
-class OptimConfig:
-    name: str = "sgd"
+class TrainConfig:
+    batch_size: int = 32
+    n_epochs: int = 32
+    optim: str = "sgd"
     lr: float = 0.01
     momentum: float = 0.9
     weight_decay: float = 0.0001
@@ -48,4 +50,4 @@ class OptimConfig:
 class Config:
     data: DataConfig = DataConfig()
     model: ModelConfig = ModelConfig()
-    optim: OptimConfig = OptimConfig()
+    train: TrainConfig = TrainConfig()

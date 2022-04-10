@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as T
 import torchvision.datasets as datasets
 import pytorch_lightning as pl
+from pytorch_lightning.loggers import WandbLogger
 
 from transformers import (
     CLIPVisionModel,
@@ -42,7 +43,7 @@ def get_train_loader(config):
     )
     train_loader = DataLoader(
         coco_train_dataset,
-        batch_size=32,
+        batch_size=config.train.batch_size,
         num_workers=config.data.n_workers,
         shuffle=True,
         collate_fn=collate_fn,
@@ -59,9 +60,17 @@ def train():
     model = VisionTextModel(model_config=config.model, vision_model=vision_model, text_model=text_model)
 
     train_loader = get_train_loader(config)
-    
     clip_method = CLIP(config, trunk=model)
-    trainer = pl.Trainer(accelerator="gpu", devices=1)
+
+    wandb_logger = WandbLogger(project='vision-text')
+    wandb_logger.experiment.config.update(config)
+
+    trainer = pl.Trainer(
+        logger=wandb_logger, 
+        accelerator="gpu", 
+        devices=1, 
+        max_epochs=config.train.n_epochs
+    )
     trainer.fit(clip_method, train_loader)
 
 
