@@ -1,19 +1,11 @@
-from PIL import Image
-import random
-import requests
-
 import torch
-import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import torchvision.transforms as T
 import torchvision.datasets as datasets
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
-from transformers import (
-    CLIPVisionModel,
-    CLIPTextModel
-)
+from transformers import CLIPVisionModel, CLIPTextModel
 
 from vision_text.models import VisionTextModel
 from vision_text.config import config_parser
@@ -62,13 +54,16 @@ def train():
     train_loader = get_train_loader(config)
     clip_method = CLIP(config, trunk=model)
 
-    wandb_logger = WandbLogger(project='vision-text')
-    wandb_logger.experiment.config.update(config)
+    loggers = []
+    if config.logger.wandb:
+        wandb_logger = WandbLogger(project=config.logger.wandb_project)
+        wandb_logger.experiment.config.update(config)
+        loggers.append(wandb_logger)
 
     trainer = pl.Trainer(
-        logger=wandb_logger, 
-        accelerator="gpu", 
-        devices=1, 
+        logger=loggers, 
+        accelerator=config.train.accelerator_type, 
+        devices=config.train.n_devices, 
         max_epochs=config.train.n_epochs
     )
     trainer.fit(clip_method, train_loader)

@@ -39,10 +39,20 @@ class ModelConfig:
 class TrainConfig:
     batch_size: int = 32
     n_epochs: int = 32
+    # Optimizer
     optim: str = "sgd"
-    lr: float = 0.01
+    lr: float = 5e-3
     momentum: float = 0.9
-    weight_decay: float = 0.0001
+    weight_decay: float = 1e-4
+    # Distributed Training
+    accelerator_type: str = "gpu"
+    n_devices: int = 1
+
+
+@dataclass
+class LoggerConfig:
+    wandb: bool = False
+    wandb_project: str = "vision-text"
 
 
 """ Root Config """
@@ -51,3 +61,4 @@ class Config:
     data: DataConfig = DataConfig()
     model: ModelConfig = ModelConfig()
     train: TrainConfig = TrainConfig()
+    logger: LoggerConfig = LoggerConfig()
