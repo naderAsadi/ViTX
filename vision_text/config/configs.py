@@ -32,7 +32,6 @@ class ModelConfig:
     text_model: TextModelConfig = TextModelConfig()
     projection_dim: int = 512
     logit_scale_init_value: float = 2.6592
-    return_dict: bool = True
 
 
 @dataclass
