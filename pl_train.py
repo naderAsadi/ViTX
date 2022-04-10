@@ -56,7 +56,10 @@ def train():
 
     loggers = []
     if config.logger.wandb:
-        wandb_logger = WandbLogger(project=config.logger.wandb_project)
+        wandb_logger = WandbLogger(
+            offline=config.logger.wandb_offline, 
+            project=config.logger.wandb_project
+        )
         wandb_logger.experiment.config.update(config)
         loggers.append(wandb_logger)
 

@@ -1,3 +1,4 @@
+from typing import Optional
 import random
 
 import torch
@@ -5,7 +6,7 @@ import pytorch_lightning as pl
 from transformers import CLIPTokenizer
 
 from ..config import Config
-from ..models import VisionOutput, VisionTextOutput
+from ..models import VisionTextModel, VisionOutput, VisionTextOutput
 from ..losses import clip_loss
 from .base import BaseMethod
 
@@ -14,10 +15,11 @@ class CLIP(BaseMethod):
 
     def __init__(
         self, 
-        config, 
-        trunk
+        config: Config, 
+        trunk: VisionTextModel,
+        head: Optional[torch.nn.Module] = None
     ):
-        super().__init__(config, trunk)
+        super().__init__(config, trunk=trunk, head=head)
 
         self.tokenizer = CLIPTokenizer.from_pretrained(self.config.model.text_model.tokenizer)
 

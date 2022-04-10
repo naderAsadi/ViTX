@@ -51,6 +51,7 @@ class TrainConfig:
 @dataclass
 class LoggerConfig:
     wandb: bool = False
+    wandb_offline: bool = False
     wandb_project: str = "vision-text"
 
 
