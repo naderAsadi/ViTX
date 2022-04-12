@@ -5,4 +5,4 @@
 
 lightning_logs/
 wandb/
-vision-text/
+snapshots/

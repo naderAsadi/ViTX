@@ -3,6 +3,11 @@ from typing import Any, ContextManager, List, Optional, Tuple
 
 import torch
 
+@dataclass
+class VisionTextInput:
+    pixel_values: Optional[torch.FloatTensor] = None
+    text_input_ids: Optional[torch.FloatTensor] = None
+    text_attention_mask: Optional[torch.FloatTensor] = None
 
 @dataclass
 class VisionOutput:
