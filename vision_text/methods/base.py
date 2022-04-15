@@ -55,3 +55,15 @@ class BaseMethod(pl.LightningModule):
     def training_step(self, batch, batch_idx):
 
         raise NotImplementedError
+
+    def validation_step(self, batch, batch_idx):
+
+        raise NotImplementedError
+
+    def test_step(self, batch, batch_idx):
+
+        raise NotImplementedError
+
+    def predict_step(self, batch, batch_idx):
+
+        raise NotImplementedError

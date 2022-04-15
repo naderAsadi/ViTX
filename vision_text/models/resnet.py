@@ -270,8 +270,8 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def return_hidden(self, x):
-        x = self.conv1(x)
+    def return_hidden(self, pixel_values, *args):
+        x = self.conv1(pixel_values)
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
@@ -286,8 +286,8 @@ class ResNet(nn.Module):
 
         return VisionOutput(vision_pooled_embeds=pooled_x, vision_model_output=x)
 
-    def forward(self, x):
-        model_output = self.return_hidden(x)
+    def forward(self, pixel_values, *args):
+        model_output = self.return_hidden(pixel_values)
         pooled_embeds, hidden_output = (
             model_output.image_pooled_embeds,
             model_output.vision_model_output,

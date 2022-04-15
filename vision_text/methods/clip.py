@@ -56,3 +56,10 @@ class CLIP(BaseMethod):
         self.log("train/loss", loss)
 
         return loss
+
+    # def validation_step(self, batch, batch_idx):
+
+    # def test_step(self, batch, batch_idx):
+
+    # def predict_step(self, batch, batch_idx):
+        
