@@ -3,6 +3,8 @@ from typing import Dict, List, Optional, Tuple
 
 
 """ Data Configs """
+
+
 @dataclass
 class DataConfig:
     dataset: str = "coco"
@@ -11,19 +13,21 @@ class DataConfig:
 
 
 """ Model Configs """
+
+
 @dataclass
 class VisionModelConfig:
-    name: str = "openai/clip-vit-base-patch32" #google/vit-base-patch16-224
+    name: str = "openai/clip-vit-base-patch32"  # google/vit-base-patch16-224
     pretrained: bool = True
     embed_dim: int = 768
 
 
 @dataclass
 class TextModelConfig:
-    name: str = "openai/clip-vit-base-patch32" #bert-base-uncased
-    tokenizer: str = 'openai/clip-vit-base-patch32'
+    name: str = "openai/clip-vit-base-patch32"  # bert-base-uncased
+    tokenizer: str = "openai/clip-vit-base-patch32"
     pretrained: bool = True
-    embed_dim: int = 512 #768
+    embed_dim: int = 512  # 768
 
 
 @dataclass
@@ -56,6 +60,8 @@ class LoggerConfig:
 
 
 """ Root Config """
+
+
 @dataclass
 class Config:
     data: DataConfig = DataConfig()

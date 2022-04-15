@@ -12,16 +12,15 @@ from ..models import VisionTextInput
 
 
 class ImageTextDataset(Dataset):
-
     def __init__(
         self,
         root: str,
-        tokenizer = None,
-        image_transform = None,
+        tokenizer=None,
+        image_transform=None,
         shuffle: Optional[bool] = False,
         image_size: Optional[int] = 224,
         resize_ratio: Optional[float] = 0.75,
-        split: Optional[str] = 'train'
+        split: Optional[str] = "train",
     ):
         """Create a image-text dataset from a directory with congruent text and image names.
 
@@ -36,7 +35,7 @@ class ImageTextDataset(Dataset):
         """
         super(ImageTextDataset, self).__init__()
 
-        if split not in ['train', 'test', 'eval']:
+        if split not in ["train", "test", "eval"]:
             raise ValueError(
                 f"Data split should be one of [`train`, `test`, `eval`], but was entered: `{split}`"
             )
@@ -46,35 +45,43 @@ class ImageTextDataset(Dataset):
         self.path = Path(root)
         self.tokenizer = tokenizer
 
-        text_files = [*path.glob('**/*.txt')]
+        text_files = [*path.glob("**/*.txt")]
         image_files = [
-            *path.glob('**/*.png'), *path.glob('**/*.jpg'),
-            *path.glob('**/*.jpeg'), *path.glob('**/*.bmp')
+            *path.glob("**/*.png"),
+            *path.glob("**/*.jpg"),
+            *path.glob("**/*.jpeg"),
+            *path.glob("**/*.bmp"),
         ]
 
         text_files = {text_file.stem: text_file for text_file in text_files}
         image_files = {image_file.stem: image_file for image_file in image_files}
 
-        keys = (image_files.keys() & text_files.keys())
+        keys = image_files.keys() & text_files.keys()
 
         self.keys = list(keys)
         self.text_files = {k: v for k, v in text_files.items() if k in keys}
         self.image_files = {k: v for k, v in image_files.items() if k in keys}
 
         if image_transform is None:
-            image_transform = T.Compose([
-                T.Lambda(self._convert_to_rgb),
-                T.RandomResizedCrop(image_size, scale=(self.resize_ratio, 1.), ratio=(1., 1.)),
-                T.ToTensor(),
-                T.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)) # ImageNet mean and std
-            ])
+            image_transform = T.Compose(
+                [
+                    T.Lambda(self._convert_to_rgb),
+                    T.RandomResizedCrop(
+                        image_size, scale=(self.resize_ratio, 1.0), ratio=(1.0, 1.0)
+                    ),
+                    T.ToTensor(),
+                    T.Normalize(
+                        mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
+                    ),  # ImageNet mean and std
+                ]
+            )
         self.image_transform = image_transform
 
     def __len__(self):
         return len(self.keys)
 
     def _convert_to_rgb(self, img):
-        return img.convert('RGB') if img.mode != 'RGB' else img
+        return img.convert("RGB") if img.mode != "RGB" else img
 
     def random_sample(self):
         return self.__getitem__(randint(0, self.__len__() - 1))
@@ -95,7 +102,7 @@ class ImageTextDataset(Dataset):
         text_file = self.text_files[key]
         image_file = self.image_files[key]
 
-        descriptions = text_file.read_text().split('\n')
+        descriptions = text_file.read_text().split("\n")
         descriptions = list(filter(lambda t: len(t) > 0, descriptions))
         try:
             description = choice(descriptions)
@@ -117,5 +124,5 @@ class ImageTextDataset(Dataset):
         return VisionTextInput(
             pixel_values=image_tensor,
             text_input_ids=tokenized_text.input_ids,
-            text_attention_mask=tokenized_text.attention_mask
+            text_attention_mask=tokenized_text.attention_mask,
         )

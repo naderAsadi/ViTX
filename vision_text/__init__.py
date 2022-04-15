@@ -1,5 +1,1 @@
-from vision_text import (
-    config, 
-    losses, 
-    models
-)
+from vision_text import config, losses, models

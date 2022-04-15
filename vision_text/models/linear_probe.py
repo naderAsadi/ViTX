@@ -6,13 +6,10 @@ import pytorch_lightning as pl
 
 from .vision_text_encoder import VisionTextModel
 
-class ProbeEvaluator(pl.LightningModule):
 
+class ProbeEvaluator(pl.LightningModule):
     def __init__(
-        self,
-        trunk: Union[VisionTextModel, nn.Module],
-        embed_dim: int,
-        n_classes: int
+        self, trunk: Union[VisionTextModel, nn.Module], embed_dim: int, n_classes: int
     ):
         """Linear probe evaluation class.
 
@@ -29,7 +26,7 @@ class ProbeEvaluator(pl.LightningModule):
     def forward(self, x):
         self.trunk.eval()
         with torch.inference_mode():
-            if 'transformers' in str(type(self.trunk)):
+            if "transformers" in str(type(self.trunk)):
                 features = self.trunk(
                     pixel_values=x,
                     output_attentions=None,
@@ -38,6 +35,6 @@ class ProbeEvaluator(pl.LightningModule):
                 )
             else:
                 features = self.trunk.return_hidden(x)
-        
+
         logits = self.linear_probe(features)
         return logits

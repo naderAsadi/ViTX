@@ -15,6 +15,7 @@ from vision_text.methods import CLIP
 def collate_fn(batch):
     return tuple(zip(*batch))
 
+
 def get_train_loader(config):
     # loading data
     train_data_path = config.data.path + "/images/train2014/"
@@ -45,11 +46,15 @@ def get_train_loader(config):
 
 
 def train():
-    config = config_parser(config_path='./configs/', config_name="default", job_name="test")
+    config = config_parser(
+        config_path="./configs/", config_name="default", job_name="test"
+    )
 
     vision_model = CLIPVisionModel.from_pretrained(config.model.vision_model.name)
     text_model = CLIPTextModel.from_pretrained(config.model.text_model.name)
-    model = VisionTextModel(model_config=config.model, vision_model=vision_model, text_model=text_model)
+    model = VisionTextModel(
+        model_config=config.model, vision_model=vision_model, text_model=text_model
+    )
 
     train_loader = get_train_loader(config)
     clip_method = CLIP(config, trunk=model)
@@ -57,17 +62,16 @@ def train():
     loggers = []
     if config.logger.wandb:
         wandb_logger = WandbLogger(
-            offline=config.logger.wandb_offline, 
-            project=config.logger.wandb_project
+            offline=config.logger.wandb_offline, project=config.logger.wandb_project
         )
         wandb_logger.experiment.config.update(config)
         loggers.append(wandb_logger)
 
     trainer = pl.Trainer(
-        logger=loggers, 
-        accelerator=config.train.accelerator_type, 
-        devices=config.train.n_devices, 
-        max_epochs=config.train.n_epochs
+        logger=loggers,
+        accelerator=config.train.accelerator_type,
+        devices=config.train.n_devices,
+        max_epochs=config.train.n_epochs,
     )
     trainer.fit(clip_method, train_loader)
 
@@ -77,9 +81,11 @@ def evaluate():
 
     inference
     outputs = model(**inputs)
-    logits_per_image = outputs.logits_per_image  # this is the image-text similarity score
-    probs = logits_per_image.softmax(dim=1) 
+    logits_per_image = (
+        outputs.logits_per_image
+    )  # this is the image-text similarity score
+    probs = logits_per_image.softmax(dim=1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     train()

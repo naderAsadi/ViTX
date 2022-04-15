@@ -10,12 +10,11 @@ from ..losses import clip_loss, cosine_similarity
 
 
 class VisionTextModel(torch.nn.Module):
-
     def __init__(
         self,
         model_config: ModelConfig,
         vision_model: Optional[nn.Module] = None,
-        text_model: Optional[nn.Module] = None
+        text_model: Optional[nn.Module] = None,
     ):
         super(VisionTextModel, self).__init__()
 
@@ -26,14 +25,18 @@ class VisionTextModel(torch.nn.Module):
                 raise ValueError(
                     "If `vision_model` is not passed as an argument, vision model `name` should be defined in the config under `model.vision_model`"
                 )
-            vision_model = AutoModel.from_pretrained(pretrained_model_name_or_path=self.config.vision_model.name)
+            vision_model = AutoModel.from_pretrained(
+                pretrained_model_name_or_path=self.config.vision_model.name
+            )
 
         if text_model is None:
             if self.config.text_model.name is None:
                 raise ValueError(
                     "If `text_model` is not passed as an argument, text model `name` should be defined in the config under `model.text_model`"
                 )
-            text_model = AutoModel.from_pretrained(pretrained_model_name_or_path=self.config.text_model.name)
+            text_model = AutoModel.from_pretrained(
+                pretrained_model_name_or_path=self.config.text_model.name
+            )
 
         # Models
         self.text_model = text_model
@@ -45,9 +48,15 @@ class VisionTextModel(torch.nn.Module):
         self.projection_dim = self.config.projection_dim
 
         # Heads
-        self.visual_projection = nn.Linear(self.vision_embed_dim, self.projection_dim, bias=False)
-        self.text_projection = nn.Linear(self.text_embed_dim, self.projection_dim, bias=False)
-        self.logit_scale = nn.Parameter(torch.ones([]) * self.config.logit_scale_init_value)
+        self.visual_projection = nn.Linear(
+            self.vision_embed_dim, self.projection_dim, bias=False
+        )
+        self.text_projection = nn.Linear(
+            self.text_embed_dim, self.projection_dim, bias=False
+        )
+        self.logit_scale = nn.Parameter(
+            torch.ones([]) * self.config.logit_scale_init_value
+        )
 
     def from_pretrained(self, model_config: ModelConfig):
         pass
@@ -59,7 +68,7 @@ class VisionTextModel(torch.nn.Module):
         output_hidden_states: Optional[torch.Tensor] = None,
     ):
         vision_outputs = {}
-        if 'transformers' in str(type(self.vision_model)):
+        if "transformers" in str(type(self.vision_model)):
             vision_outputs = self.vision_model(
                 pixel_values=pixel_values,
                 output_attentions=output_attentions,
@@ -67,7 +76,10 @@ class VisionTextModel(torch.nn.Module):
                 return_dict=True,
             )
         else:
-            vision_outputs['pooler_output'], vision_outputs['last_hidden_state'] = self.vision_model.return_hidden(pixel_values)
+            (
+                vision_outputs["pooler_output"],
+                vision_outputs["last_hidden_state"],
+            ) = self.vision_model.return_hidden(pixel_values)
 
         return vision_outputs
 
@@ -88,7 +100,7 @@ class VisionTextModel(torch.nn.Module):
             output_hidden_states=output_hidden_states,
         )
 
-        pooled_output = vision_outputs['pooler_output']  # pooled_output
+        pooled_output = vision_outputs["pooler_output"]  # pooled_output
         image_features = self.visual_projection(pooled_output)
 
         return image_features
@@ -125,12 +137,12 @@ class VisionTextModel(torch.nn.Module):
         self,
         input_ids,
         pixel_values,
-        attention_mask = None,
-        position_ids = None,
-        return_loss = None,
-        token_type_ids = None,
-        output_attentions = None,
-        output_hidden_states = None
+        attention_mask=None,
+        position_ids=None,
+        return_loss=None,
+        token_type_ids=None,
+        output_attentions=None,
+        output_hidden_states=None,
     ):
 
         vision_outputs = self._forward_vision_model(
@@ -147,7 +159,7 @@ class VisionTextModel(torch.nn.Module):
             output_hidden_states=output_hidden_states,
         )
 
-        image_embeds = vision_outputs['pooler_output']  # pooler_output
+        image_embeds = vision_outputs["pooler_output"]  # pooler_output
         image_embeds = self.visual_projection(image_embeds)
 
         text_embeds = text_outputs[1]  # pooler_output
@@ -159,9 +171,9 @@ class VisionTextModel(torch.nn.Module):
 
         # cosine similarity as logits
         logits_per_text, logits_per_image = cosine_similarity(
-            text_embeds=text_embeds, 
-            image_embeds=image_embeds, 
-            logit_scale=self.logit_scale
+            text_embeds=text_embeds,
+            image_embeds=image_embeds,
+            logit_scale=self.logit_scale,
         )
 
         return VisionTextOutput(
