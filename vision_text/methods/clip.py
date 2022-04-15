@@ -61,5 +61,8 @@ class CLIP(BaseMethod):
 
     # def test_step(self, batch, batch_idx):
 
+    # def _shared_eval_step(self, batch, batch_idx):
+    #     pass
+
     # def predict_step(self, batch, batch_idx):
         

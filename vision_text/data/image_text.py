@@ -67,7 +67,7 @@ class ImageTextDataset(Dataset):
                 [
                     T.Lambda(self._convert_to_rgb),
                     T.RandomResizedCrop(
-                        image_size, scale=(self.resize_ratio, 1.0), ratio=(1.0, 1.0)
+                        image_size, scale=(resize_ratio, 1.0), ratio=(1.0, 1.0)
                     ),
                     T.ToTensor(),
                     T.Normalize(
