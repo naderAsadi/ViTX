@@ -12,6 +12,8 @@ from .base import BaseMethod
 
 
 class CLIP(BaseMethod):
+    
+    EMBED_DIM = 512
 
     def __init__(
         self, 
