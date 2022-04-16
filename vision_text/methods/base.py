@@ -25,8 +25,12 @@ class BaseMethod(pl.LightningModule):
         self.head = head
 
     def configure_optimizers(self):
+        params = [{"params": self.trunk.parameters()}]
+        if self.head is not None:
+            params.append({"params": self.head.parameters()})
+
         optimizer = torch.optim.SGD(
-            self.trunk.parameters(),
+            params=params,
             lr=self.config.train.lr,
             momentum=self.config.train.momentum,
             weight_decay=self.config.train.weight_decay,
