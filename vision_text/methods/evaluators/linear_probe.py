@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import pytorch_lightning as pl
 
-from .vision_text_encoder import VisionTextModel
+from ...models import VisionTextModel
 
 
 class ProbeEvaluator(pl.LightningModule):
