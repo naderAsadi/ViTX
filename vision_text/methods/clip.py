@@ -20,43 +20,33 @@ class CLIP(BaseMethod):
         config: Config,
         trunk: VisionTextModel,
         head: Optional[torch.nn.Module] = None,
+        tokenizer: Optional[CLIPTokenizer] = None,
     ):
         super().__init__(config, trunk=trunk, head=head)
 
-        self.tokenizer = CLIPTokenizer.from_pretrained(
-            self.config.model.text_model.tokenizer
-        )
+        if tokenizer is None:
+            tokenizer = CLIPTokenizer.from_pretrained(
+                self.config.model.text_model.tokenizer
+            )
+        self.tokenizer = tokenizer
 
     def _compute_loss(self, outputs: VisionTextOutput) -> torch.FloatTensor:
 
         return clip_loss(outputs.logits_per_text)
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
-        image, caption = batch
-        text_inputs = self.tokenizer(caption, return_tensors="pt", padding=True)
+        images, captions = batch
+        text_inputs = self.tokenizer(captions, return_tensors="pt", padding=True)
 
-        return image, text_inputs.input_ids, text_inputs.attention_mask
+        return images, text_inputs.input_ids, text_inputs.attention_mask
 
     def training_step(self, batch, batch_idx):
-        images, text_input_ids, text_attention_mask = batch
-        device = next(self.trunk.parameters()).device
-
-        # print(images.shape, text_input_ids.shape, text_attention_mask.shape)
-
-        # text = []
-        # for cap in captions:
-        #     text.append(random.choice(cap))
-
-        # text_inputs = self.tokenizer(text, return_tensors="pt", padding=True)
-        # pixel_values = torch.stack(images)
-
-        # for key, value in text_inputs.items():
-        #     text_inputs[key] = value.to(device)
+        pixel_values, text_input_ids, text_attention_mask = batch
 
         outputs = self.trunk(
             input_ids=text_input_ids,
             attention_mask=text_attention_mask,
-            pixel_values=images,
+            pixel_values=pixel_values,
             return_loss=False,
         )
 
@@ -70,7 +60,5 @@ class CLIP(BaseMethod):
     # def test_step(self, batch, batch_idx):
 
     # def _shared_eval_step(self, batch, batch_idx):
-    #     pass
 
     # def predict_step(self, batch, batch_idx):
-        

@@ -11,13 +11,11 @@ from ..models import VisionTextInput
 
 
 class COCODataset(datasets.CocoCaptions):
-
     def __init__(
-        self, 
-        root: str, 
+        self,
+        root: str,
         ann_file_path: str,
-        tokenizer = None,
-        image_transform = None,
+        image_transform=None,
         image_size: Optional[int] = 224,
         resize_ratio: Optional[float] = 0.75,
     ):
@@ -26,8 +24,9 @@ class COCODataset(datasets.CocoCaptions):
         Args:
             root (str): Folder containing images from COCO Caption dataset.
             ann_file_path (str): Path to the COCO Caption annotation file.
-            tokenizer (_type_, optional): Any custom text tokenizer. Defaults to None.
             image_transform (_type_, optional): _description_. Defaults to None.
+            image_size (Optional[int], optional): The size of outputted images.. Defaults to 224.
+            resize_ratio (Optional[float], optional): Minimum percentage of image contained by resize. Defaults to 0.75.
         """
 
         if image_transform is None:
@@ -42,10 +41,9 @@ class COCODataset(datasets.CocoCaptions):
                     ),  # ImageNet mean and std
                 ]
             )
-        self.tokenizer = tokenizer
-
-        super(COCODataset, self).__init__(root=root, annFile=ann_file_path, transform=image_transform)
-
+        super(COCODataset, self).__init__(
+            root=root, annFile=ann_file_path, transform=image_transform
+        )
 
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
         """
@@ -59,30 +57,13 @@ class COCODataset(datasets.CocoCaptions):
         img_id = self.ids[index]
         ann_ids = coco.getAnnIds(imgIds=img_id)
         anns = coco.loadAnns(ann_ids)
-        target = [ann['caption'] for ann in anns]
+        target = [ann["caption"] for ann in anns]
 
-        path = coco.loadImgs(img_id)[0]['file_name']
+        path = coco.loadImgs(img_id)[0]["file_name"]
 
-        img = Image.open(os.path.join(self.root, path)).convert('RGB')
+        img = Image.open(os.path.join(self.root, path)).convert("RGB")
 
         if self.transforms is not None:
             img, target = self.transforms(img, target)
 
         return img, random.choice(target)
-        
-        # if self.tokenizer is None:
-        #     return img, target
-        
-        # tokenized_text = self.tokenizer(random.choice(target), return_tensors="pt", padding=True)
-
-        # print(img.shape, tokenized_text.input_ids.shape, tokenized_text.attention_mask.shape)
-
-        # return img, tokenized_text.input_ids, tokenized_text.attention_mask
-
-        # return {
-        #     'pixel_values': img,
-        #     'text_input_ids': tokenized_text.input_ids,
-        #     'text_attention_mask': tokenized_text.attention_mask,
-        # }
-
-        

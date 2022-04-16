@@ -52,6 +52,10 @@ class BaseMethod(pl.LightningModule):
 
         return outputs
 
+    def on_before_batch_transfer(self, batch, dataloader_idx):
+
+        super().on_before_batch_transfer(batch, dataloader_idx)
+
     def training_step(self, batch, batch_idx):
 
         raise NotImplementedError

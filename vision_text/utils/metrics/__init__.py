@@ -1,3 +1,1 @@
-from .retrieval_metrics import (
-    retrieval_map
-)
+from .retrieval_metrics import retrieval_map
