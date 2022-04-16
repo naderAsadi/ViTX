@@ -15,6 +15,8 @@ from vision_text.data import COCODataset
 def get_train_loader(config):
     train_data_path = config.data.path + "/images/train2014/"
     train_ann_path = config.data.path + "/annotations/captions_train2014.json"
+    test_data_path = config.data.path + "/images/val2014/"
+    test_ann_path = config.data.path + "/annotations/captions_val2014.json"
 
     transform_train = T.Compose(
         [
@@ -30,6 +32,11 @@ def get_train_loader(config):
         ann_file_path=train_ann_path,
         image_transform=transform_train,
     )
+    coco_test_dataset = COCODataset(
+        root=test_data_path,
+        ann_file_path=test_ann_path,
+        image_transform=transform_train,
+    )
 
     train_loader = DataLoader(
         coco_train_dataset,
@@ -37,8 +44,14 @@ def get_train_loader(config):
         num_workers=config.data.n_workers,
         shuffle=True,
     )
+    test_loader = DataLoader(
+        coco_test_dataset,
+        batch_size=config.train.batch_size,
+        num_workers=config.data.n_workers,
+        shuffle=False,
+    )
 
-    return train_loader
+    return train_loader, test_loader
 
 
 def train():
@@ -52,7 +65,7 @@ def train():
         model_config=config.model, vision_model=vision_model, text_model=text_model
     )
 
-    train_loader = get_train_loader(config)
+    train_loader, test_loader = get_train_loader(config)
     clip_method = CLIP(config, trunk=model)
 
     loggers = []
@@ -69,18 +82,9 @@ def train():
         devices=config.train.n_devices,
         max_epochs=config.train.n_epochs,
     )
-    trainer.fit(clip_method, train_loader)
 
-
-def evaluate():
-    model = VisionTextDualEncoderModel.from_pretrained("vit-bert")
-
-    # inference
-    outputs = model(**inputs)
-    logits_per_image = (
-        outputs.logits_per_image
-    )  # this is the image-text similarity score
-    probs = logits_per_image.softmax(dim=1)
+    trainer.fit(model=clip_method, train_dataloaders=train_loader)
+    trainer.test(model=clip_method, dataloaders=test_loader)
 
 
 if __name__ == "__main__":

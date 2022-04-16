@@ -1,1 +1,1 @@
-from .retrieval_metrics import retrieval_map
+from .retrieval_metrics import get_retrieval_map, RetrievalMap

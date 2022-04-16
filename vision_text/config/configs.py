@@ -36,11 +36,12 @@ class ModelConfig:
     text_model: TextModelConfig = TextModelConfig()
     projection_dim: int = 512
     logit_scale_init_value: float = 2.6592
+    checkpoint_root: str = "./checkpoints/"
 
 
 @dataclass
 class TrainConfig:
-    batch_size: int = 32
+    batch_size: int = 64
     n_epochs: int = 32
     # Optimizer
     optim: str = "sgd"
@@ -54,6 +55,7 @@ class TrainConfig:
 
 @dataclass
 class LoggerConfig:
+    log_train_acc: bool = False
     wandb: bool = False
     wandb_offline: bool = False
     wandb_project: str = "vision-text"
