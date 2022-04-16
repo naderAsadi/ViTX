@@ -31,24 +31,32 @@ class CLIP(BaseMethod):
 
         return clip_loss(outputs.logits_per_text)
 
+    def on_before_batch_transfer(self, batch, dataloader_idx):
+        image, caption = batch
+        text_inputs = self.tokenizer(caption, return_tensors="pt", padding=True)
+
+        return image, text_inputs.input_ids, text_inputs.attention_mask
+
     def training_step(self, batch, batch_idx):
-        images, captions = batch
+        images, text_input_ids, text_attention_mask = batch
         device = next(self.trunk.parameters()).device
 
-        text = []
-        for cap in captions:
-            text.append(random.choice(cap))
+        # print(images.shape, text_input_ids.shape, text_attention_mask.shape)
 
-        text_inputs = self.tokenizer(text, return_tensors="pt", padding=True)
-        pixel_values = torch.stack(images)
+        # text = []
+        # for cap in captions:
+        #     text.append(random.choice(cap))
 
-        for key, value in text_inputs.items():
-            text_inputs[key] = value.to(device)
+        # text_inputs = self.tokenizer(text, return_tensors="pt", padding=True)
+        # pixel_values = torch.stack(images)
+
+        # for key, value in text_inputs.items():
+        #     text_inputs[key] = value.to(device)
 
         outputs = self.trunk(
-            input_ids=text_inputs.input_ids,
-            attention_mask=text_inputs.attention_mask,
-            pixel_values=pixel_values,
+            input_ids=text_input_ids,
+            attention_mask=text_attention_mask,
+            pixel_values=images,
             return_loss=False,
         )
 

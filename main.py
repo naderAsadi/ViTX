@@ -6,14 +6,20 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
 from transformers import CLIPVisionModel, CLIPTextModel
+from transformers import CLIPTokenizer
 
 from vision_text.models import VisionTextModel
 from vision_text.config import config_parser
 from vision_text.methods import CLIP
+from vision_text.data import COCODataset
 
 
 def collate_fn(batch):
-    return tuple(zip(*batch))
+    # print(len(batch), type(batch[0]))
+    stack = tuple(zip(*batch))
+    print(len(stack))
+    return (torch.stack(stack[0]), torch.stack(stack[1]), torch.stack(stack[2]))
+    # return tuple(batch[0])
 
 
 def get_train_loader(config):
@@ -31,15 +37,22 @@ def get_train_loader(config):
             T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
-    coco_train_dataset = datasets.CocoCaptions(
-        root=train_data_path, annFile=train_ann_path, transform=transform_train
+    # coco_train_dataset = datasets.CocoCaptions(
+    #     root=train_data_path, annFile=train_ann_path, transform=transform_train
+    # )
+    tokenizer = CLIPTokenizer.from_pretrained(config.model.text_model.tokenizer)
+    coco_train_dataset = COCODataset(
+        root=train_data_path, 
+        ann_file_path=train_ann_path,
+        tokenizer=tokenizer
     )
+
     train_loader = DataLoader(
         coco_train_dataset,
         batch_size=config.train.batch_size,
         num_workers=config.data.n_workers,
         shuffle=True,
-        collate_fn=collate_fn,
+        # collate_fn=collate_fn,
     )
 
     return train_loader

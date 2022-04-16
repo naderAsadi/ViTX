@@ -1,5 +1,6 @@
 import os
 import os.path
+import random
 from PIL import Image
 from typing import Any, Callable, Optional, Tuple
 
@@ -32,7 +33,6 @@ class COCODataset(datasets.CocoCaptions):
         if image_transform is None:
             image_transform = T.Compose(
                 [
-                    T.Lambda(self._convert_to_rgb),
                     T.RandomResizedCrop(
                         image_size, scale=(resize_ratio, 1.0), ratio=(1.0, 1.0)
                     ),
@@ -68,7 +68,21 @@ class COCODataset(datasets.CocoCaptions):
         if self.transforms is not None:
             img, target = self.transforms(img, target)
 
-        if self.tokenizer is not None:
-            target = self.tokenizer(target, return_tensors="pt", padding=True)
+        return img, random.choice(target)
+        
+        # if self.tokenizer is None:
+        #     return img, target
+        
+        # tokenized_text = self.tokenizer(random.choice(target), return_tensors="pt", padding=True)
 
-        return img, target
+        # print(img.shape, tokenized_text.input_ids.shape, tokenized_text.attention_mask.shape)
+
+        # return img, tokenized_text.input_ids, tokenized_text.attention_mask
+
+        # return {
+        #     'pixel_values': img,
+        #     'text_input_ids': tokenized_text.input_ids,
+        #     'text_attention_mask': tokenized_text.attention_mask,
+        # }
+
+        
