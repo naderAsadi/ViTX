@@ -12,7 +12,18 @@ from vision_text.methods import CLIP
 from vision_text.data import COCODataset
 
 
-def get_train_loader(config):
+def get_logger(config):
+    loggers = []
+    if config.logger.wandb:
+        wandb_logger = WandbLogger(
+            offline=config.logger.wandb_offline, project=config.logger.wandb_project
+        )
+        wandb_logger.experiment.config.update(config)
+        loggers.append(wandb_logger)
+
+    return loggers
+
+def get_loaders(config):
     train_data_path = config.data.path + "/images/train2014/"
     train_ann_path = config.data.path + "/annotations/captions_train2014.json"
     test_data_path = config.data.path + "/images/val2014/"
@@ -65,16 +76,10 @@ def train():
         model_config=config.model, vision_model=vision_model, text_model=text_model
     )
 
-    train_loader, test_loader = get_train_loader(config)
+    train_loader, test_loader = get_loaders(config)
     clip_method = CLIP(config, trunk=model)
 
-    loggers = []
-    if config.logger.wandb:
-        wandb_logger = WandbLogger(
-            offline=config.logger.wandb_offline, project=config.logger.wandb_project
-        )
-        wandb_logger.experiment.config.update(config)
-        loggers.append(wandb_logger)
+    loggers = get_logger(config)
 
     trainer = pl.Trainer(
         logger=loggers,
