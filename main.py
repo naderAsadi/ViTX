@@ -1,12 +1,10 @@
 import torch
 from torch.utils.data import DataLoader
 import torchvision.transforms as T
-import torchvision.datasets as datasets
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
 from transformers import CLIPVisionModel, CLIPTextModel
-from transformers import CLIPTokenizer
 
 from vision_text.models import VisionTextModel
 from vision_text.config import config_parser
