@@ -8,7 +8,8 @@ from typing import Dict, List, Optional, Tuple
 @dataclass
 class DataConfig:
     dataset: str = "coco"
-    path: str = "../datasets/coco-caption"
+    data_path: str = "../datasets/coco-caption/images/"
+    annotation_path: str = "../datasets/coco-caption/annotations/"
     n_workers: int = 8
 
 

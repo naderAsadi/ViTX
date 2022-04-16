@@ -2,7 +2,6 @@ import torch
 from torch.utils.data import DataLoader
 import torchvision.transforms as T
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import WandbLogger
 
 from transformers import CLIPVisionModel, CLIPTextModel
 
@@ -10,24 +9,14 @@ from vision_text.models import VisionTextModel
 from vision_text.config import config_parser
 from vision_text.methods import CLIP
 from vision_text.data import COCODataset
+from vision_text.utils import get_loggers
 
-
-def get_logger(config):
-    loggers = []
-    if config.logger.wandb:
-        wandb_logger = WandbLogger(
-            offline=config.logger.wandb_offline, project=config.logger.wandb_project
-        )
-        wandb_logger.experiment.config.update(config)
-        loggers.append(wandb_logger)
-
-    return loggers
 
 def get_loaders(config):
-    train_data_path = config.data.path + "/images/train2014/"
-    train_ann_path = config.data.path + "/annotations/captions_train2014.json"
-    test_data_path = config.data.path + "/images/val2014/"
-    test_ann_path = config.data.path + "/annotations/captions_val2014.json"
+    train_data_path = config.data.data_path + "train2014/"
+    train_ann_path = config.data.annotation_path + "captions_train2014.json"
+    test_data_path = config.data.data_path + "val2014/"
+    test_ann_path = config.data.annotation_path + "captions_val2014.json"
 
     transform_train = T.Compose(
         [
@@ -65,7 +54,7 @@ def get_loaders(config):
     return train_loader, test_loader
 
 
-def train():
+def main():
     config = config_parser(
         config_path="./configs/", config_name="default", job_name="test"
     )
@@ -79,7 +68,7 @@ def train():
     train_loader, test_loader = get_loaders(config)
     clip_method = CLIP(config, trunk=model)
 
-    loggers = get_logger(config)
+    loggers = get_loggers(logger_config=config.logger)
 
     trainer = pl.Trainer(
         logger=loggers,
@@ -93,4 +82,4 @@ def train():
 
 
 if __name__ == "__main__":
-    train()
+    main()
