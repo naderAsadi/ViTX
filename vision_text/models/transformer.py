@@ -134,6 +134,77 @@ class Transformer(nn.Module):
         return self.resblocks(x)
 
 
+class VisualTransformer(nn.Module):
+    def __init__(
+        self,
+        seq_size: int,
+        embed_dim: int,
+        layers: int,
+        heads: int,
+        projection_dim: int,
+        act_layer: Callable = nn.GELU,
+        n_modalities: int = 1,
+    ):
+        super().__init__()
+
+        self.projection_dim = projection_dim
+        self.seq_size = seq_size
+        scale = embed_dim**-0.5
+
+        self.class_embedding = nn.Parameter(scale * torch.randn(embed_dim))
+
+        self.positional_embedding = nn.Parameter(
+            scale * torch.randn((seq_size) + 1, embed_dim)
+        )
+        self.ln_pre = LayerNorm(embed_dim)
+
+        self.transformer = Transformer(embed_dim, layers, heads, act_layer=act_layer)
+
+        self.ln_post = LayerNorm(embed_dim)
+
+        self.projection = nn.Parameter(scale * torch.randn(embed_dim, projection_dim))
+
+    def forward(self, embeds: torch.Tensor):
+        """_summary_
+
+        Args:
+            vision_embed (torch.Tensor): [batch_size, sequence_length, feature_dim]
+            text_embed (torch.Tensor): [batch_size, sequence_length, feature_dim]
+
+        Returns:
+            _type_: _description_
+        """
+
+        x = torch.cat(
+            [
+                self.class_embedding.to(embeds.dtype)
+                + torch.zeros(
+                    embeds.shape[0],
+                    1,
+                    embeds.shape[-1],
+                    dtype=embeds.dtype,
+                    device=embeds.device,
+                ),
+                embeds,
+            ],
+            dim=1,
+        )  # shape = [*, grid ** 2 + 1, width]
+
+        x = x + self.positional_embedding.to(x.dtype)
+        x = self.ln_pre(x)
+
+        x = x.permute(1, 0, 2)  # NLD -> LND
+        x = self.transformer(x)
+        x = x.permute(1, 0, 2)  # LND -> NLD
+
+        pooled_output = self.ln_post(x[:, 0, :])
+
+        if self.projection is not None:
+            pooled_output = pooled_output @ self.projection
+
+        return pooled_output, x
+
+
 class MultiModalTransformer(nn.Module):
     def __init__(
         self,
