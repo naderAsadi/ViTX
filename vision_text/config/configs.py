@@ -8,9 +8,12 @@ from typing import Dict, List, Optional, Tuple
 @dataclass
 class DataConfig:
     dataset: str = "coco"
-    data_path: str = "../datasets/coco-caption/images/"
+    images_path: str = "../datasets/coco-caption/images/"
     annotation_path: str = "../datasets/coco-caption/annotations/"
     n_workers: int = 8
+    # image_transform
+    image_size: int = 224
+    resize_ratio: float = 0.75
 
 
 """ Model Configs """

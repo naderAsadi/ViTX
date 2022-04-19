@@ -7,22 +7,23 @@ from typing import Any, Callable, Optional, Tuple
 from torchvision import transforms as T
 import torchvision.datasets as datasets
 
+from ..config import DataConfig
 from ..models import VisionTextInput
 
 
 class COCODataset(datasets.CocoCaptions):
     def __init__(
         self,
-        root: str,
+        images_path: str,
         ann_file_path: str,
-        image_transform=None,
+        image_transform = None,
         image_size: Optional[int] = 224,
         resize_ratio: Optional[float] = 0.75,
     ):
         """COCO Caption dataset.
 
         Args:
-            root (str): Folder containing images from COCO Caption dataset.
+            images_path (str): Folder containing images from COCO Caption dataset.
             ann_file_path (str): Path to the COCO Caption annotation file.
             image_transform (_type_, optional): _description_. Defaults to None.
             image_size (Optional[int], optional): The size of outputted images.. Defaults to 224.
@@ -42,7 +43,17 @@ class COCODataset(datasets.CocoCaptions):
                 ]
             )
         super(COCODataset, self).__init__(
-            root=root, annFile=ann_file_path, transform=image_transform
+            root=images_path, annFile=ann_file_path, transform=image_transform
+        )
+
+    @classmethod
+    def from_config(cls, config: DataConfig) -> "COCODataset":
+        
+        return cls(
+            images_path = config.images_path,
+            ann_file_path = config.annotation_path,
+            image_size = config.image_size,
+            resize_ratio = config.resize_ratio
         )
 
     def __getitem__(self, index: int) -> Tuple[Any, Any]:

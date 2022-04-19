@@ -13,9 +13,9 @@ from vision_text.utils import get_loggers
 
 
 def get_loaders(config):
-    train_data_path = config.data.data_path + "train2014/"
+    train_data_path = config.data.images_path + "train2014/"
     train_ann_path = config.data.annotation_path + "captions_train2014.json"
-    test_data_path = config.data.data_path + "val2014/"
+    test_data_path = config.data.images_path + "val2014/"
     test_ann_path = config.data.annotation_path + "captions_val2014.json"
 
     transform_train = T.Compose(

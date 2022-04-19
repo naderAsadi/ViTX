@@ -1,7 +1,9 @@
 .vscode/
 .idea/
+.ipynb_checkpoints/
 **/__pycache__
 *.pyc
+*.ipynb
 
 lightning_logs/
 wandb/
