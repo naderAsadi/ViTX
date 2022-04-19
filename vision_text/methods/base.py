@@ -15,14 +15,18 @@ class BaseMethod(pl.LightningModule):
         trunk: Optional[nn.Module],
         head: Optional[nn.Module] = None,
         tokenizer=None,
-        feature_extractor=None,
-        processor=None,
     ):
         super().__init__()
 
         self.config = config
         self.trunk = trunk
         self.head = head
+        self.tokenizer = tokenizer
+
+    @classmethod
+    def from_config(cls, config: Config):
+
+        raise NotImplementedError
 
     def configure_optimizers(self):
         params = [{"params": self.trunk.parameters()}]
@@ -37,11 +41,9 @@ class BaseMethod(pl.LightningModule):
         )
         return optimizer
 
-    def _compute_loss(
-        self, outputs: Union[VisionOutput, VisionTextOutput]
-    ) -> torch.FloatTensor:
+    def on_before_batch_transfer(self, batch, dataloader_idx):
 
-        raise NotImplementedError
+        super().on_before_batch_transfer(batch, dataloader_idx)
 
     def forward(self, input_ids, attention_mask, pixel_values):
         outputs = self.trunk(
@@ -56,9 +58,11 @@ class BaseMethod(pl.LightningModule):
 
         return outputs
 
-    def on_before_batch_transfer(self, batch, dataloader_idx):
+    def _compute_loss(
+        self, outputs: Union[VisionOutput, VisionTextOutput]
+    ) -> torch.FloatTensor:
 
-        super().on_before_batch_transfer(batch, dataloader_idx)
+        raise NotImplementedError
 
     def training_step(self, batch, batch_idx):
 

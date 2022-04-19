@@ -59,16 +59,10 @@ def main():
         config_path="./configs/", config_name="default", job_name="test"
     )
 
-    vision_model = CLIPVisionModel.from_pretrained(config.model.vision_model.name)
-    text_model = CLIPTextModel.from_pretrained(config.model.text_model.name)
-    model = VisionTextModel(
-        model_config=config.model, vision_model=vision_model, text_model=text_model
-    )
-
     train_loader, test_loader = get_loaders(config)
-    clip_method = CLIP(config, trunk=model)
-
     loggers = get_loggers(logger_config=config.logger)
+
+    clip_method = CLIP.from_config(config)
 
     trainer = pl.Trainer(
         logger=loggers,

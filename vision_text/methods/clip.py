@@ -3,7 +3,7 @@ import random
 
 import torch
 import pytorch_lightning as pl
-from transformers import CLIPTokenizer
+from transformers import CLIPTokenizer, CLIPVisionModel, CLIPTextModel
 
 from .base import BaseMethod
 from ..config import Config
@@ -23,13 +23,34 @@ class CLIP(BaseMethod):
         head: Optional[torch.nn.Module] = None,
         tokenizer: Optional[CLIPTokenizer] = None,
     ):
-        super().__init__(config, trunk=trunk, head=head)
 
         if tokenizer is None:
             tokenizer = CLIPTokenizer.from_pretrained(
                 self.config.model.text_model.tokenizer
             )
-        self.tokenizer = tokenizer
+
+        super().__init__(config=config, trunk=trunk, head=head, tokenizer=tokenizer)
+
+    @classmethod
+    def from_config(cls, config: Config):
+        """Returns an instance of CLIP class from `config` (Config) file.
+
+        Args:
+            config (Config): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        vision_model = CLIPVisionModel.from_pretrained(config.model.vision_model.name)
+        text_model = CLIPTextModel.from_pretrained(config.model.text_model.name)
+
+        model = VisionTextModel(
+            model_config=config.model, vision_model=vision_model, text_model=text_model
+        )
+
+        tokenizer = CLIPTokenizer.from_pretrained(config.model.text_model.tokenizer)
+
+        return cls(config=config, trunk=model, tokenizer=tokenizer)
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
         images, captions = batch
