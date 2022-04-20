@@ -56,6 +56,10 @@ class CLIP(BaseMethod):
         images, captions = batch
         text_inputs = self.tokenizer(captions, return_tensors="pt", padding=True)
 
+        if text_inputs.input_ids.size(-1) > 77:  # Max sequence length
+            text_inputs.input_ids = text_inputs.input_ids[..., :77]
+            text_inputs.attention_mask = text_inputs.attention_mask[..., :77]
+
         return images, text_inputs.input_ids, text_inputs.attention_mask
 
     def training_step(self, batch, batch_idx):

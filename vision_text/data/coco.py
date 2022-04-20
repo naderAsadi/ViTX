@@ -7,10 +7,12 @@ from typing import Any, Callable, Optional, Tuple
 from torchvision import transforms as T
 import torchvision.datasets as datasets
 
+from . import register_dataset
 from ..config import DataConfig
 from ..models import VisionTextInput
 
 
+@register_dataset("coco")
 class COCODataset(datasets.CocoCaptions):
     def __init__(
         self,

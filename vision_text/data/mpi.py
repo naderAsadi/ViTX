@@ -7,9 +7,11 @@ import torch
 from torch.utils.data import Dataset
 from torchvision import transforms as T
 
+from . import register_dataset
 from ..config import DataConfig
 
 
+@register_dataset("mpi")
 class MPIVideoDataset(Dataset):
     def __init__(
         self,
@@ -82,6 +84,7 @@ class MPIVideoDataset(Dataset):
         return cls(
             images_path=config.images_path,
             ann_file_path=config.annotation_path,
+            n_frames=config.n_frames,
             image_size=config.image_size,
             resize_ratio=config.resize_ratio,
         )

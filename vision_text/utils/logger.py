@@ -1,13 +1,17 @@
 from pytorch_lightning.loggers import WandbLogger
+from transformers.utils import logging
 
-from ..config import LoggerConfig
+from ..config import Config
 
 
-def get_loggers(logger_config: LoggerConfig):
+def get_loggers(config: Config):
+    # set huggingface verbosity to ERROR
+    logging.set_verbosity(verbosity=logging.ERROR)
+
     loggers = []
-    if logger_config.wandb:
+    if config.logger.wandb:
         wandb_logger = WandbLogger(
-            offline=logger_config.wandb_offline, project=logger_config.wandb_project
+            offline=config.logger.wandb_offline, project=config.logger.wandb_project
         )
         wandb_logger.experiment.config.update(config)
         loggers.append(wandb_logger)

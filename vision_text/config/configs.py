@@ -11,6 +11,7 @@ class DataConfig:
     images_path: str = "../datasets/coco-caption/images/"
     annotation_path: str = "../datasets/coco-caption/annotations/"
     n_workers: int = 8
+    n_frames: int = 8
     # image_transform
     image_size: int = 224
     resize_ratio: float = 0.75
@@ -40,13 +41,14 @@ class ModelConfig:
     text_model: TextModelConfig = TextModelConfig()
     projection_dim: int = 512
     logit_scale_init_value: float = 2.6592
-    checkpoint_root: str = "./checkpoints/"
+    checkpoint_root: str = "checkpoints/"
 
 
 @dataclass
 class TrainConfig:
     batch_size: int = 64
     n_epochs: int = 32
+    check_val_every_n_epoch: int = 10
     # Optimizer
     optim: str = "sgd"
     lr: float = 5e-3
