@@ -111,7 +111,7 @@ class MPIVideoDataset(Dataset):
         )
 
         image_tensors = []
-        for n in range(len(image_files)):
+        for image_file in image_files:
             img = Image.open(image_file).convert("RGB")
             image_tensors.append(self.image_transform(img).unsqueeze(1))
 
