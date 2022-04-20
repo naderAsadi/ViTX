@@ -16,7 +16,7 @@ class COCODataset(datasets.CocoCaptions):
         self,
         images_path: str,
         ann_file_path: str,
-        image_transform = None,
+        image_transform=None,
         image_size: Optional[int] = 224,
         resize_ratio: Optional[float] = 0.75,
     ):
@@ -48,12 +48,12 @@ class COCODataset(datasets.CocoCaptions):
 
     @classmethod
     def from_config(cls, config: DataConfig) -> "COCODataset":
-        
+
         return cls(
-            images_path = config.images_path,
-            ann_file_path = config.annotation_path,
-            image_size = config.image_size,
-            resize_ratio = config.resize_ratio
+            images_path=config.images_path,
+            ann_file_path=config.annotation_path,
+            image_size=config.image_size,
+            resize_ratio=config.resize_ratio,
         )
 
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
