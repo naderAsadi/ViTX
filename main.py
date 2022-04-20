@@ -8,11 +8,11 @@ from transformers import CLIPVisionModel, CLIPTextModel
 from vision_text.models import VisionTextModel
 from vision_text.config import config_parser
 from vision_text.methods import CLIP
-from vision_text.data import COCODataset
+from vision_text.data import COCODataset, MPIVideoDataset
 from vision_text.utils import get_loggers
 
 
-def get_loaders(config):
+def get_coco_loaders(config):
     train_data_path = config.data.images_path + "train2014/"
     train_ann_path = config.data.annotation_path + "captions_train2014.json"
     test_data_path = config.data.images_path + "val2014/"
@@ -53,13 +53,44 @@ def get_loaders(config):
 
     return train_loader, test_loader
 
+def get_mpi_loaders(config):
+    train_data_path = config.data.images_path + "train/"
+    test_data_path = config.data.images_path + "test/"
+    ann_path = config.data.annotation_path + "annotations-original.csv"
+
+    mpi_train_dataset = MPIVideoDataset(
+        images_path=train_data_path,
+        ann_file_path=ann_path,
+        n_frames=1,
+    )
+    mpi_test_dataset = MPIVideoDataset(
+        images_path=test_data_path,
+        ann_file_path=ann_path,
+        n_frames=1,
+    )
+
+    train_loader = DataLoader(
+        mpi_train_dataset,
+        batch_size=config.train.batch_size,
+        num_workers=config.data.n_workers,
+        shuffle=True,
+    )
+    test_loader = DataLoader(
+        mpi_test_dataset,
+        batch_size=config.train.batch_size,
+        num_workers=config.data.n_workers,
+        shuffle=False,
+    )
+
+    return train_loader, test_loader
+
 
 def main():
     config = config_parser(
         config_path="./configs/", config_name="default", job_name="test"
     )
 
-    train_loader, test_loader = get_loaders(config)
+    train_loader, test_loader = get_mpi_loaders(config)
     loggers = get_loggers(logger_config=config.logger)
 
     clip_method = CLIP.from_config(config)

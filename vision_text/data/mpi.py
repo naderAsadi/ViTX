@@ -1,14 +1,13 @@
 from pathlib import Path
 from PIL import Image
 from random import randint, choices
-from typing import Optional
+from typing import Any, Optional, Tuple
 
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms as T
 
 from ..config import DataConfig
-from ..models import VisionTextInput
 
 
 class MPIVideoDataset(Dataset):
@@ -103,7 +102,7 @@ class MPIVideoDataset(Dataset):
             return self.random_sample()
         return self.sequential_sample(idx=idx)
 
-    def __getitem__(self, idx) -> VisionTextInput:
+    def __getitem__(self, idx) -> Tuple[Any, Any]:
         key = self.keys[idx]
 
         caption = self.captions[key]
