@@ -22,17 +22,17 @@ class DataConfig:
 
 @dataclass
 class VisionModelConfig:
-    name: str = "openai/clip-vit-base-patch32"  # google/vit-base-patch16-224
+    name: str = "openai/clip-vit-base-patch32"  # openai/clip-vit-large-patch14
     pretrained: bool = True
     embed_dim: int = 768
 
 
 @dataclass
 class TextModelConfig:
-    name: str = "openai/clip-vit-base-patch32"  # bert-base-uncased
+    name: str = "openai/clip-vit-base-patch32"  # openai/clip-vit-large-patch14
     tokenizer: str = "openai/clip-vit-base-patch32"
     pretrained: bool = True
-    embed_dim: int = 512  # 768
+    embed_dim: int = 512
 
 
 @dataclass
