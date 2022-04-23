@@ -5,6 +5,7 @@ import torch
 import pytorch_lightning as pl
 from transformers import CLIPTokenizer, CLIPVisionModel, CLIPTextModel
 
+from . import register_method
 from .base import BaseMethod
 from ..config import Config
 from ..models import VisionTextModel, VisionOutput, VisionTextOutput
@@ -12,6 +13,7 @@ from ..losses import clip_loss
 from ..utils.metrics import get_retrieval_map, RetrievalMap
 
 
+@register_method("clip")
 class CLIP(BaseMethod):
 
     EMBED_DIM = 512

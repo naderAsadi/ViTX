@@ -2,9 +2,6 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 
-""" Data Configs """
-
-
 @dataclass
 class DataConfig:
     dataset: str = "coco"
@@ -15,9 +12,6 @@ class DataConfig:
     # image_transform
     image_size: int = 224
     resize_ratio: float = 0.75
-
-
-""" Model Configs """
 
 
 @dataclass
@@ -67,11 +61,9 @@ class LoggerConfig:
     wandb_project: str = "vision-text"
 
 
-""" Root Config """
-
-
 @dataclass
 class Config:
+    method: str = "clip"
     data: DataConfig = DataConfig()
     model: ModelConfig = ModelConfig()
     train: TrainConfig = TrainConfig()
