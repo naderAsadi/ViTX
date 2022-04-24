@@ -17,7 +17,7 @@ class AttentionPool2d(nn.Module):
     ):
         super().__init__()
         self.positional_embedding = nn.Parameter(
-            torch.randn(spacial_dim ** 2 + 1, embed_dim) / embed_dim ** 0.5
+            torch.randn(spacial_dim**2 + 1, embed_dim) / embed_dim**0.5
         )
         self.k_proj = nn.Linear(embed_dim, embed_dim)
         self.q_proj = nn.Linear(embed_dim, embed_dim)
@@ -149,7 +149,7 @@ class VisualTransformer(nn.Module):
 
         self.projection_dim = projection_dim
         self.seq_size = seq_size
-        scale = embed_dim ** -0.5
+        scale = embed_dim**-0.5
 
         self.class_embedding = nn.Parameter(scale * torch.randn(embed_dim))
 
@@ -220,7 +220,7 @@ class MultiModalTransformer(nn.Module):
 
         self.projection_dim = projection_dim
         self.seq_size = seq_size
-        scale = embed_dim ** -0.5
+        scale = embed_dim**-0.5
 
         self.vision_class_embedding = nn.Parameter(scale * torch.randn(embed_dim))
         self.text_class_embedding = nn.Parameter(scale * torch.randn(embed_dim))

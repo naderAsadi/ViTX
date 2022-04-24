@@ -5,11 +5,8 @@ import pytorch_lightning as pl
 
 from transformers import CLIPVisionModel, CLIPTextModel
 
+from vision_text import config_parser, get_dataloaders, get_loggers, get_method
 from vision_text.models import VisionTextModel
-from vision_text.config import config_parser
-from vision_text.methods import CLIP, get_method
-from vision_text.data import COCODataset, MPIVideoDataset, get_dataloaders
-from vision_text.utils import get_loggers
 
 
 def main():
@@ -21,7 +18,6 @@ def main():
 
     loggers = get_loggers(config=config)
 
-    # clip_method = CLIP.from_config(config)
     method = get_method(config=config)
 
     trainer = pl.Trainer(
