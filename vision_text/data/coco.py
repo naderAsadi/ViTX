@@ -49,13 +49,17 @@ class COCODataset(datasets.CocoCaptions):
         )
 
     @classmethod
-    def from_config(cls, data_config: DataConfig, split: str = 'train') -> "COCODataset":
+    def from_config(
+        cls, data_config: DataConfig, split: str = "train"
+    ) -> "COCODataset":
 
-        assert split in ['train', 'val', 'test'], (
-            f"`split` should be in [`train`, `val`, `test`], but {split} is entered."
-        )
+        assert split in [
+            "train",
+            "val",
+            "test",
+        ], f"`split` should be in [`train`, `val`, `test`], but {split} is entered."
 
-        if split == 'train':
+        if split == "train":
             images_path = data_config.train_images_path
             ann_file_path = data_config.train_ann_path
         else:

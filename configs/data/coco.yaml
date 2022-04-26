@@ -1,4 +1,3 @@
-
 dataset: "coco"
 train_images_path: "../datasets/coco-caption/images/train/"
 val_images_path: "../datasets/coco-caption/images/val/"

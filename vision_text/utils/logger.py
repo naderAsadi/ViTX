@@ -1,7 +1,7 @@
 from typing import Optional
+from omegaconf import OmegaConf
 from rich import print as rprint
 from rich.console import Console
-
 
 from pytorch_lightning.loggers import WandbLogger
 from transformers.utils import logging
@@ -16,9 +16,10 @@ def get_loggers(config: Config):
     loggers = []
     if config.logger.wandb:
         wandb_logger = WandbLogger(
-            offline=config.logger.wandb_offline, project=config.logger.wandb_project
+            offline=config.logger.wandb_offline,
+            project=config.logger.wandb_project,
+            config=OmegaConf.to_container(config, resolve=True, throw_on_missing=True),
         )
-        wandb_logger.experiment.config.update(config)
         loggers.append(wandb_logger)
 
     return loggers

@@ -1,8 +1,3 @@
-# defaults:
-#   - base_config
-#   - _self_
-
-# data: 
 dataset: "mpi"
 train_images_path: "../datasets/mpi_dataset/images/train/"
 val_images_path: "../datasets/mpi_dataset/images/val/"
@@ -13,25 +8,3 @@ image_size: 224
 resize_ratio: 0.75
 n_frames: 1
 
-# model:
-#   vision_model:
-#     name: "openai/clip-vit-base-patch32"
-#     pretrained: True
-#     embed_dim: 768
-
-#   text_model:
-#     name: "openai/clip-vit-base-patch32"
-#     tokenizer: "openai/clip-vit-base-patch32"
-#     pretrained: True
-#     embed_dim: 512
-  
-#   projection_dim: 512
-
-# train:
-#   batch_size: 64
-#   n_epochs: 32
-#   check_val_every_n_epoch: 10
-#   optim: "sgd"
-#   lr: 0.005
-#   momentum: 0.9
-#   weight_decay: 0.0001

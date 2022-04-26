@@ -10,7 +10,7 @@ from ..utils import spinner_animation
 def get_dataloaders(config: Config):
 
     train_dataset = get_dataset(data_config=config.data, split="train")
-    test_dataset = get_dataset(data_config=config.data, split="test")
+    val_dataset = get_dataset(data_config=config.data, split="val")
 
     train_loader = DataLoader(
         dataset=train_dataset,
@@ -18,11 +18,11 @@ def get_dataloaders(config: Config):
         num_workers=config.data.n_workers,
         shuffle=True,
     )
-    test_loader = DataLoader(
-        dataset=test_dataset,
+    val_loader = DataLoader(
+        dataset=val_dataset,
         batch_size=config.train.batch_size,
         num_workers=config.data.n_workers,
         shuffle=False,
     )
 
-    return train_loader, test_loader
+    return train_loader, val_loader

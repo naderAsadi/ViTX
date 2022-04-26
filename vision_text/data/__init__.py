@@ -44,9 +44,11 @@ def register_dataset(name, bypass_checks=False):
     return register_dataset_cls
 
 
-def get_dataset(data_config: DataConfig, split: str = 'train'):
+def get_dataset(data_config: DataConfig, split: str = "train"):
 
-    dataset = DATASET_REGISTRY[data_config.dataset].from_config(data_config=data_config, split=split)
+    dataset = DATASET_REGISTRY[data_config.dataset].from_config(
+        data_config=data_config, split=split
+    )
     return dataset
 
 
