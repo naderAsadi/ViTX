@@ -1,3 +1,8 @@
+from typing import Optional
+from rich import print as rprint
+from rich.console import Console
+
+
 from pytorch_lightning.loggers import WandbLogger
 from transformers.utils import logging
 
@@ -17,3 +22,13 @@ def get_loggers(config: Config):
         loggers.append(wandb_logger)
 
     return loggers
+
+
+def spinner_animation(message: str, spinner_type: Optional[str] = "dots"):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            console = Console()
+            with console.status(message, spinner=spinner_type):
+                return func(*args, **kwargs)
+        return wrapper
+    return decorator
