@@ -5,8 +5,10 @@ from typing import Dict, List, Optional, Tuple
 @dataclass
 class DataConfig:
     dataset: str = "coco"
-    images_path: str = "../datasets/coco-caption/images/"
-    annotation_path: str = "../datasets/coco-caption/annotations/"
+    train_images_path: str = "../datasets/coco-caption/images/train/"
+    val_images_path: str = "../datasets/coco-caption/images/val/"
+    train_ann_path: str = "../datasets/coco-caption/annotations/captions_train2014.json"
+    val_ann_path: str = "../datasets/coco-caption/annotations/captions_val2014.json"
     n_workers: int = 8
     n_frames: int = 8
     # image_transform

@@ -1,0 +1,10 @@
+
+dataset: "coco"
+train_images_path: "../datasets/coco-caption/images/train/"
+val_images_path: "../datasets/coco-caption/images/val/"
+train_ann_path: "../datasets/coco-caption/annotations/captions_train2014.json"
+val_ann_path: "../datasets/coco-caption/annotations/captions_val2014.json"
+n_workers: 8
+image_size: 224
+resize_ratio: 0.75
+

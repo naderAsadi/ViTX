@@ -79,14 +79,25 @@ class MPIVideoDataset(Dataset):
         self.image_transform = image_transform
 
     @classmethod
-    def from_config(cls, config: DataConfig) -> "MPIVideoDataset":
+    def from_config(cls, data_config: DataConfig, split: str = 'train') -> "MPIVideoDataset":
+
+        assert split in ['train', 'val', 'test'], (
+            f"`split` should be in [`train`, `val`, `test`], but {split} is entered."
+        )
+
+        if split == 'train':
+            images_path = data_config.train_images_path
+            ann_file_path = data_config.train_ann_path
+        else:
+            images_path = data_config.val_images_path
+            ann_file_path = data_config.val_ann_path
 
         return cls(
-            images_path=config.images_path,
-            ann_file_path=config.annotation_path,
-            n_frames=config.n_frames,
-            image_size=config.image_size,
-            resize_ratio=config.resize_ratio,
+            images_path=images_path,
+            ann_file_path=ann_file_path,
+            n_frames=data_config.n_frames,
+            image_size=data_config.image_size,
+            resize_ratio=data_config.resize_ratio,
         )
 
     def __len__(self):

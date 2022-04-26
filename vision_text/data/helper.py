@@ -9,16 +9,8 @@ from ..utils import spinner_animation
 @spinner_animation(message="Loading Datasets...")
 def get_dataloaders(config: Config):
 
-    data_path = config.data.images_path
-
-    # create train dataset
-    config.data.images_path = data_path + "train/"
-    train_dataset = get_dataset(data_config=config.data)
-    # create test dataset
-    config.data.images_path = data_path + "val/"
-    test_dataset = get_dataset(data_config=config.data)
-
-    config.data.images_path = data_path
+    train_dataset = get_dataset(data_config=config.data, split="train")
+    test_dataset = get_dataset(data_config=config.data, split="test")
 
     train_loader = DataLoader(
         dataset=train_dataset,

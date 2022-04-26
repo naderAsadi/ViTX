@@ -30,5 +30,7 @@ def spinner_animation(message: str, spinner_type: Optional[str] = "dots"):
             console = Console()
             with console.status(message, spinner=spinner_type):
                 return func(*args, **kwargs)
+
         return wrapper
+
     return decorator

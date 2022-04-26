@@ -1,0 +1,10 @@
+vision_model:
+  name: "openai/clip-vit-base-patch32"
+  pretrained: True
+  embed_dim: 768
+
+text_model:
+  name: "openai/clip-vit-base-patch32"
+  tokenizer: "openai/clip-vit-base-patch32"
+  pretrained: True
+  embed_dim: 512
