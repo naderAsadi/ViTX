@@ -1,6 +1,5 @@
 from typing import Optional
 from omegaconf import OmegaConf
-from rich import print as rprint
 from rich.console import Console
 
 from pytorch_lightning.loggers import WandbLogger

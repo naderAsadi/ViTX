@@ -8,3 +8,5 @@ text_model:
   tokenizer: "openai/clip-vit-base-patch32"
   pretrained: True
   embed_dim: 512
+
+projection_dim: 512

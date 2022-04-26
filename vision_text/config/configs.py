@@ -52,7 +52,7 @@ class TrainConfig:
     weight_decay: float = 1e-4
     # Distributed Training
     accelerator_type: str = "gpu"
-    n_devices: int = 1
+    n_devices: int = -1
 
 
 @dataclass
