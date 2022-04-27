@@ -20,6 +20,7 @@ class ImageTextDataset(Dataset):
         image_transform: Optional = None,
         image_size: Optional[int] = 224,
         resize_ratio: Optional[float] = 0.75,
+        shuffle: Optional[bool] = False,
     ):
         """Create a image-text dataset from a directory with congruent text and image names.
 
@@ -68,6 +69,7 @@ class ImageTextDataset(Dataset):
                 ]
             )
         self.image_transform = image_transform
+        self.shuffle = shuffle
 
     @classmethod
     def from_config(
@@ -114,6 +116,11 @@ class ImageTextDataset(Dataset):
         key = self.keys[idx]
 
         caption = self.captions[key]
-        image = self.image_transform(Image.open(self.image_files[key]).convert("RGB"))
+        try:
+            image = self.image_transform(
+                Image.open(self.image_files[key]).convert("RGB")
+            )
+        except:
+            return self.skip_sample(idx)
 
         return image, caption

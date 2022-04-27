@@ -15,7 +15,9 @@ def main():
         config_path="./configs/", config_name="default", job_name="test"
     )
 
-    train_loader, test_loader = get_dataloaders(config=config)
+    train_loader, test_loader = get_dataloaders(
+        config=config, return_val_loader=config.train.check_val
+    )
 
     loggers = get_loggers(config=config)
 

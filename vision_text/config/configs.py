@@ -44,6 +44,7 @@ class ModelConfig:
 class TrainConfig:
     batch_size: int = 64
     n_epochs: int = 32
+    check_val: bool = True
     check_val_every_n_epoch: int = 10
     # Optimizer
     optim: str = "sgd"

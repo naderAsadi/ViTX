@@ -7,7 +7,7 @@ from ..utils import spinner_animation
 
 
 @spinner_animation(message="Loading Datasets...")
-def get_dataloaders(config: Config, return_val_loader: bool = False):
+def get_dataloaders(config: Config, return_val_loader: bool = True):
 
     train_dataset = get_dataset(data_config=config.data, split="train")
 
