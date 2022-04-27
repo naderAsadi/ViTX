@@ -7,10 +7,9 @@ from ..utils import spinner_animation
 
 
 @spinner_animation(message="Loading Datasets...")
-def get_dataloaders(config: Config):
+def get_dataloaders(config: Config, return_val_loader: bool = False):
 
     train_dataset = get_dataset(data_config=config.data, split="train")
-    val_dataset = get_dataset(data_config=config.data, split="val")
 
     train_loader = DataLoader(
         dataset=train_dataset,
@@ -18,11 +17,17 @@ def get_dataloaders(config: Config):
         num_workers=config.data.n_workers,
         shuffle=True,
     )
-    val_loader = DataLoader(
-        dataset=val_dataset,
-        batch_size=config.train.batch_size,
-        num_workers=config.data.n_workers,
-        shuffle=False,
-    )
 
-    return train_loader, val_loader
+    if return_val_loader:
+        val_dataset = get_dataset(data_config=config.data, split="val")
+
+        val_loader = DataLoader(
+            dataset=val_dataset,
+            batch_size=config.train.batch_size,
+            num_workers=config.data.n_workers,
+            shuffle=False,
+        )
+
+        return train_loader, val_loader
+
+    return train_loader

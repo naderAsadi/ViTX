@@ -1,71 +1,63 @@
 from pathlib import Path
-import PIL
-from random import randint, choice
-from typing import Optional
+from PIL import Image
+from random import randint, choices
+from typing import Any, Optional, Tuple
 
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from torchvision import transforms as T
-from transformers import CLIPTokenizer
 
-from ..models import VisionTextInput
+from . import register_dataset
+from ..config import DataConfig
 
 
+@register_dataset("image_text")
 class ImageTextDataset(Dataset):
     def __init__(
         self,
-        root: str,
-        tokenizer=None,
-        image_transform=None,
-        shuffle: Optional[bool] = False,
+        images_path: str,
+        ann_file_path: str,
+        image_transform: Optional = None,
         image_size: Optional[int] = 224,
         resize_ratio: Optional[float] = 0.75,
-        split: Optional[str] = "train",
     ):
         """Create a image-text dataset from a directory with congruent text and image names.
 
         Args:
-            root (str): Folder containing images and text files matched by their paths' respective "stem"
-            tokenizer (_type_, optional): Any custom text tokenizer. Defaults to None.
+            images_path (str): Path to the folder containing images of the dataset.
+            ann_file_path (str): Path to the `json` or `csv` annotation file.
             image_transform (_type_, optional): _description_. Defaults to None.
-            shuffle (Optional[bool], optional): _description_. Defaults to False.
             image_size (Optional[int], optional): The size of outputted images.. Defaults to 224.
             resize_ratio (Optional[float], optional): Minimum percentage of image contained by resize. Defaults to 0.75.
-            split (Optional[str], optional): Either train, test, or eval. Defaults to 'train'.
         """
         super(ImageTextDataset, self).__init__()
 
-        if split not in ["train", "test", "eval"]:
-            raise ValueError(
-                f"Data split should be one of [`train`, `test`, `eval`], but was entered: `{split}`"
-            )
-        if tokenizer is None:
-            tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-base-patch32")
+        # load the captions
+        with open(ann_file_path, "r") as file:
+            lines = file.readlines()
+        captions = {
+            line.split("\t", 1)[0]: line.split("\t", 1)[1].strip() for line in lines
+        }
 
-        self.path = Path(root)
-        self.tokenizer = tokenizer
-
-        text_files = [*path.glob("**/*.txt")]
+        # get image files path
+        images_path = Path(images_path)
         image_files = [
-            *path.glob("**/*.png"),
-            *path.glob("**/*.jpg"),
-            *path.glob("**/*.jpeg"),
-            *path.glob("**/*.bmp"),
+            *images_path.glob("**/*.png"),
+            *images_path.glob("**/*.jpg"),
+            *images_path.glob("**/*.jpeg"),
+            *images_path.glob("**/*.bmp"),
         ]
+        image_files = {str(file.parts[-1].split(".")[0]): file for file in image_files}
 
-        text_files = {text_file.stem: text_file for text_file in text_files}
-        image_files = {image_file.stem: image_file for image_file in image_files}
-
-        keys = image_files.keys() & text_files.keys()
+        keys = image_files.keys() & captions.keys()
 
         self.keys = list(keys)
-        self.text_files = {k: v for k, v in text_files.items() if k in keys}
+        self.captions = {k: v for k, v in captions.items() if k in keys}
         self.image_files = {k: v for k, v in image_files.items() if k in keys}
 
         if image_transform is None:
             image_transform = T.Compose(
                 [
-                    T.Lambda(self._convert_to_rgb),
                     T.RandomResizedCrop(
                         image_size, scale=(resize_ratio, 1.0), ratio=(1.0, 1.0)
                     ),
@@ -77,11 +69,33 @@ class ImageTextDataset(Dataset):
             )
         self.image_transform = image_transform
 
+    @classmethod
+    def from_config(
+        cls, data_config: DataConfig, split: str = "train"
+    ) -> "ImageTextDataset":
+
+        assert split in [
+            "train",
+            "val",
+            "test",
+        ], f"`split` should be in [`train`, `val`, `test`], but {split} is entered."
+
+        if split == "train":
+            images_path = data_config.train_images_path
+            ann_file_path = data_config.train_ann_path
+        else:
+            images_path = data_config.val_images_path
+            ann_file_path = data_config.val_ann_path
+
+        return cls(
+            images_path=images_path,
+            ann_file_path=ann_file_path,
+            image_size=data_config.image_size,
+            resize_ratio=data_config.resize_ratio,
+        )
+
     def __len__(self):
         return len(self.keys)
-
-    def _convert_to_rgb(self, img):
-        return img.convert("RGB") if img.mode != "RGB" else img
 
     def random_sample(self):
         return self.__getitem__(randint(0, self.__len__() - 1))
@@ -96,33 +110,10 @@ class ImageTextDataset(Dataset):
             return self.random_sample()
         return self.sequential_sample(idx=idx)
 
-    def __getitem__(self, idx) -> VisionTextInput:
+    def __getitem__(self, idx) -> Tuple[Any, Any]:
         key = self.keys[idx]
 
-        text_file = self.text_files[key]
-        image_file = self.image_files[key]
+        caption = self.captions[key]
+        image = self.image_transform(Image.open(self.image_files[key]).convert("RGB"))
 
-        descriptions = text_file.read_text().split("\n")
-        descriptions = list(filter(lambda t: len(t) > 0, descriptions))
-        try:
-            description = choice(descriptions)
-        except IndexError as zero_captions_in_file_ex:
-            print(f"An exception occurred trying to load file {text_file}.")
-            print(f"Skipping index {idx}")
-            return self.skip_sample(idx)
-
-        tokenized_text = self.tokenizer(description, return_tensors="pt", padding=True)
-
-        try:
-            image_tensor = self.image_transform(PIL.Image.open(image_file))
-        except (PIL.UnidentifiedImageError, OSError) as corrupt_image_exceptions:
-            print(f"An exception occurred trying to load file {image_file}.")
-            print(f"Skipping index {idx}")
-            return self.skip_sample(idx)
-
-        # Success
-        return VisionTextInput(
-            pixel_values=image_tensor,
-            text_input_ids=tokenized_text.input_ids,
-            text_attention_mask=tokenized_text.attention_mask,
-        )
+        return image, caption

@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 import torchvision.transforms as T
 import pytorch_lightning as pl
+from pytorch_lightning.strategies import DDPStrategy
 
 from transformers import CLIPVisionModel, CLIPTextModel
 
@@ -24,6 +25,7 @@ def main():
         logger=loggers,
         accelerator=config.train.accelerator_type,
         devices=config.train.n_devices,
+        strategy=DDPStrategy(find_unused_parameters=False),
         max_epochs=config.train.n_epochs,
         check_val_every_n_epoch=config.train.check_val_every_n_epoch,
     )
