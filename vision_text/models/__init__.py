@@ -1,5 +1,5 @@
 from .resnet import resnet18, resnet34, resnet50, resnet101, resnet152
-from .vision_text_encoder import VisionTextModel
+from .vision_text_dual_encoder import VisionTextModel
 from .vision_transformer import (
     Transformer,
     VisualTransformer,
