@@ -4,7 +4,7 @@ import requests
 import torch
 import torch.nn as nn
 
-from .utils import VisionOutput
+from .dummy_dataclasses import VisionOutput
 
 
 __all__ = [

@@ -9,7 +9,6 @@ import torchvision.datasets as datasets
 
 from . import register_dataset
 from ..config import DataConfig
-from ..models import VisionTextInput
 
 
 @register_dataset("coco")

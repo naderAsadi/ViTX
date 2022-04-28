@@ -4,7 +4,7 @@ import torch.nn as nn
 
 from transformers import AutoModel, VisionTextDualEncoderModel
 
-from .utils import VisionTextOutput
+from .dummy_dataclasses import VisionTextOutput
 from ..config import ModelConfig
 from ..losses import clip_loss, cosine_similarity
 

@@ -14,4 +14,4 @@ from .vision_transformer import (
     vit_huge_patch14,
     vit_giant_patch14,
 )
-from .utils import VisionTextInput, VisionOutput, TextOutput, VisionTextOutput
+from .dummy_dataclasses import VisionOutput, TextOutput, VisionTextOutput

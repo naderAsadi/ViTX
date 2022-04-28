@@ -5,13 +5,6 @@ import torch
 
 
 @dataclass
-class VisionTextInput:
-    pixel_values: Optional[torch.FloatTensor] = None
-    text_input_ids: Optional[torch.FloatTensor] = None
-    text_attention_mask: Optional[torch.FloatTensor] = None
-
-
-@dataclass
 class VisionOutput:
     loss: Optional[torch.FloatTensor] = None
     vision_pooled_embeds: torch.FloatTensor = None
@@ -33,5 +26,5 @@ class VisionTextOutput:
     text_pooled_embeds: torch.FloatTensor = None
     vision_model_output: torch.FloatTensor = None
     text_model_output: torch.FloatTensor = None
-    logits_per_image: Optional[torch.FloatTensor] = (None,)
-    logits_per_text: Optional[torch.FloatTensor] = (None,)
+    logits_per_image: Optional[torch.FloatTensor] = None
+    logits_per_text: Optional[torch.FloatTensor] = None
