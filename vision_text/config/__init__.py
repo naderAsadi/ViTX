@@ -4,6 +4,7 @@ from .configs import (
     DataConfig,
     LoggerConfig,
     ModelConfig,
+    OptimizerConfig,
     TextModelConfig,
     VisionModelConfig,
     TrainConfig,

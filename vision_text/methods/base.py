@@ -4,42 +4,57 @@ import torch
 import torch.nn as nn
 import pytorch_lightning as pl
 
-from ..config import Config
+from ..config import Config, OptimizerConfig
 from ..models import VisionOutput, VisionTextOutput
 
 
 class BaseMethod(pl.LightningModule):
     def __init__(
         self,
-        config: Config,
         trunk: Optional[nn.Module],
         head: Optional[nn.Module] = None,
-        tokenizer=None,
+        tokenizer: Optional = None,
+        max_token_length: Optional[int] = 77,
+        trunk_optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
+        head_optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
+        log_train_acc: Optional[bool] = False,
     ):
         super().__init__()
 
-        self.config = config
         self.trunk = trunk
         self.head = head
         self.tokenizer = tokenizer
 
+        self.trunk_optim_config = trunk_optim_config
+        self.head_optim_config = head_optim_config
+
+        self.max_token_length = max_token_length
+        self.log_train_acc = log_train_acc
+
     @classmethod
-    def from_config(cls, config: Config):
+    def from_config(cls, config: Config) -> "BaseMethod":
 
         raise NotImplementedError
 
     def configure_optimizers(self):
-        params = [{"params": self.trunk.parameters()}]
-        if self.head is not None:
-            params.append({"params": self.head.parameters()})
-
-        optimizer = torch.optim.SGD(
-            params=params,
-            lr=self.config.train.lr,
-            momentum=self.config.train.momentum,
-            weight_decay=self.config.train.weight_decay,
+        trunk_optim = torch.optim.SGD(
+            params=self.trunk.parameters(),
+            lr=self.trunk_optim_config.lr,
+            momentum=self.trunk_optim_config.momentum,
+            weight_decay=self.trunk_optim_config.weight_decay,
         )
-        return optimizer
+
+        if self.head is not None:
+            head_optim = torch.optim.SGD(
+                params=self.head.parameters(),
+                lr=self.head_optim_config.lr,
+                momentum=self.head_optim_config.momentum,
+                weight_decay=self.head_optim_config.weight_decay,
+            )
+
+            return trunk_optim, head_optim
+
+        return trunk_optim
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
 

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 import random
 
 import torch
@@ -7,7 +7,7 @@ from transformers import CLIPTokenizer, CLIPVisionModel, CLIPTextModel
 
 from . import register_method
 from .base import BaseMethod
-from ..config import Config
+from ..config import Config, OptimizerConfig
 from ..models import VisionTextModel, VisionOutput, VisionTextOutput
 from ..losses import clip_loss
 from ..utils.metrics import get_retrieval_map, RetrievalMap
@@ -15,33 +15,33 @@ from ..utils.metrics import get_retrieval_map, RetrievalMap
 
 @register_method("clip")
 class CLIP(BaseMethod):
-
-    EMBED_DIM = 512
-
     def __init__(
         self,
-        config: Config,
         trunk: VisionTextModel,
-        head: Optional[torch.nn.Module] = None,
-        tokenizer: Optional[CLIPTokenizer] = None,
+        tokenizer: CLIPTokenizer,
+        max_token_length: Optional[int] = 77,
+        trunk_optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
+        head_optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
+        log_train_acc: Optional[bool] = False,
     ):
-
-        if tokenizer is None:
-            tokenizer = CLIPTokenizer.from_pretrained(
-                self.config.model.text_model.tokenizer
-            )
-
-        super().__init__(config=config, trunk=trunk, head=head, tokenizer=tokenizer)
+        super().__init__(
+            trunk=trunk,
+            tokenizer=tokenizer,
+            max_token_length=max_token_length,
+            trunk_optim_config=trunk_optim_config,
+            head_optim_config=head_optim_config,
+            log_train_acc=log_train_acc,
+        )
 
     @classmethod
-    def from_config(cls, config: Config):
+    def from_config(cls, config: Config) -> "CLIP":
         """Returns an instance of CLIP class from `config` (Config) file.
 
         Args:
-            config (Config): _description_
+            config (Config): root config file.
 
         Returns:
-            _type_: _description_
+            CLIP: an instance of CLIP method class.
         """
         vision_model = CLIPVisionModel.from_pretrained(config.model.vision_model.name)
         text_model = CLIPTextModel.from_pretrained(config.model.text_model.name)
@@ -52,15 +52,24 @@ class CLIP(BaseMethod):
 
         tokenizer = CLIPTokenizer.from_pretrained(config.model.text_model.tokenizer)
 
-        return cls(config=config, trunk=model, tokenizer=tokenizer)
+        return cls(
+            trunk=model,
+            tokenizer=tokenizer,
+            max_token_length=config.model.text_model.max_token_length,
+            trunk_optim_config=config.model.optimizer,
+            head_optim_config=config.head.optimizer,
+            log_train_acc=config.logger.log_train_acc,
+        )
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
         images, captions = batch
-        text_inputs = self.tokenizer(captions, return_tensors="pt", padding=True)
-
-        if text_inputs.input_ids.size(-1) > 77:  # Max sequence length
-            text_inputs.input_ids = text_inputs.input_ids[..., :77]
-            text_inputs.attention_mask = text_inputs.attention_mask[..., :77]
+        text_inputs = self.tokenizer(
+            captions,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=self.max_token_length,
+        )
 
         return images, text_inputs.input_ids, text_inputs.attention_mask
 
@@ -78,7 +87,7 @@ class CLIP(BaseMethod):
 
         metrics["train/loss"] = loss
 
-        if self.config.logger.log_train_acc:
+        if self.log_train_acc:
             retrieval_map = get_retrieval_map(logits_per_text=outputs.logits_per_text)
             acc = retrieval_map.acc_per_text
             metrics["train/acc"] = acc
