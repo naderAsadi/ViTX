@@ -312,7 +312,6 @@ def load_state_dict_from_url(model_name: str, model_url: str):
         data = requests.get(model_url)
         with open(local_file, "wb") as file:
             file.write(data.content)
-        print(f"{model_name} downloaded :tada:")
 
     return torch.load(local_file)
 
