@@ -43,6 +43,7 @@ class BaseMethod(pl.LightningModule):
             momentum=self.trunk_optim_config.momentum,
             weight_decay=self.trunk_optim_config.weight_decay,
         )
+        optimizers = [trunk_optim]
 
         if self.head is not None:
             head_optim = torch.optim.SGD(
@@ -52,9 +53,9 @@ class BaseMethod(pl.LightningModule):
                 weight_decay=self.head_optim_config.weight_decay,
             )
 
-            return trunk_optim, head_optim
+            optimizers.append(head_optim)
 
-        return trunk_optim
+        return optimizers
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
 
