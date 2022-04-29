@@ -64,7 +64,7 @@ class TrainConfig:
     batch_size: int = 64
     n_epochs: int = 32
     check_val: bool = True
-    check_val_every_n_epoch: int = 10
+    check_val_every_n_epoch: int = 5
     # Distributed Training
     accelerator_type: str = "gpu"
     n_devices: int = -1
