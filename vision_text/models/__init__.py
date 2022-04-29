@@ -2,11 +2,17 @@ import copy
 import traceback
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import torch.nn as nn
+from transformers import (
+    CLIPVisionModel,
+    CLIPTextModel,
+    CLIPVisionConfig,
+    CLIPTextConfig,
+)
 
-from ..config import ModelConfig
+from ..config import VisionModelConfig, TextModelConfig
 from ..utils.registry_utils import import_all_modules
 
 
@@ -44,10 +50,29 @@ def register_model(name, bypass_checks=False):
     return register_model_cls
 
 
-def get_model(model_name: str, *args, **kwargs):
+def get_model(model_config: Union[VisionModelConfig, TextModelConfig], *args, **kwargs):
 
-    assert model_name in MODEL_REGISTRY, "unknown model"
-    model = MODEL_REGISTRY[model_name](*args, **kwargs)
+    if model_config.from_huggingface:
+        if "tokenizer" not in model_config.keys():
+            model = CLIPVisionModel.from_pretrained(model_config.name)
+        else:
+            if model_config.pretrained:
+                model = CLIPTextModel.from_pretrained(model_config.name)
+            else:
+                text_model = CLIPTextModel(
+                    CLIPTextConfig(
+                        vocab_size=model_config.vocab_size,
+                        hidden_size=model_config.embed_dim,
+                        num_hidden_layers=model_config.n_hidden_layers,
+                        num_attention_heads=model_config.n_attention_heads,
+                        max_position_embeddings=model_config.max_token_length,
+                    )
+                )
+
+        return model
+
+    assert model_config.name in MODEL_REGISTRY, f"unknown model: {model_config.name}"
+    model = MODEL_REGISTRY[model_config.name](*args, **kwargs)
 
     return model
 
@@ -72,4 +97,4 @@ from .vision_transformer import (
     vit_giant_patch14,
 )
 from .vision_text_dual_encoder import VisionTextEncoder
-from .dummy_dataclasses import VisionOutput, TextOutput, VisionTextOutput
+from .dummy_dataclasses import ModelOutput, VisionTextDualOutput

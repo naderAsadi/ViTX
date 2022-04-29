@@ -5,7 +5,7 @@ import torch.nn as nn
 import pytorch_lightning as pl
 
 from ..config import Config, OptimizerConfig
-from ..models import VisionOutput, VisionTextOutput
+from ..models import ModelOutput, VisionTextDualOutput
 
 
 class BaseMethod(pl.LightningModule):
@@ -75,7 +75,7 @@ class BaseMethod(pl.LightningModule):
         return outputs
 
     def _compute_loss(
-        self, outputs: Union[VisionOutput, VisionTextOutput]
+        self, outputs: Union[ModelOutput, VisionTextDualOutput]
     ) -> torch.FloatTensor:
 
         raise NotImplementedError

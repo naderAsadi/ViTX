@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 
 from . import register_model
-from .dummy_dataclasses import VisionOutput
+from .dummy_dataclasses import ModelOutput
 
 
 __all__ = [
@@ -166,7 +166,7 @@ class ResNet(nn.Module):
         self,
         block,
         layers,
-        num_classes=1000,
+        output_dim=1000,
         zero_init_residual=False,
         groups=1,
         width_per_group=64,
@@ -211,7 +211,7 @@ class ResNet(nn.Module):
             block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2]
         )
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.fc = nn.Linear(512 * block.expansion, output_dim)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -285,20 +285,16 @@ class ResNet(nn.Module):
         pooled_x = self.avgpool(x)
         pooled_x = torch.flatten(pooled_x, 1)
 
-        return VisionOutput(vision_pooled_embeds=pooled_x, vision_model_output=x)
+        return pooled_x, x
 
     def forward(self, pixel_values, *args):
-        model_output = self.return_hidden(pixel_values)
-        pooled_embeds, hidden_output = (
-            model_output.image_pooled_embeds,
-            model_output.vision_model_output,
-        )
-        logits = self.fc(pooled_embeds)
+        pooled_model_embeds, model_embeds = self.return_hidden(pixel_values)
+        logits = self.fc(pooled_model_embeds)
 
-        return VisionOutput(
-            vision_pooled_embeds=pooled_embeds,
-            vision_model_output=hidden_output,
-            logits=logits,
+        return ModelOutput(
+            pooled_last_hidden=pooled_model_embeds,
+            last_hidden_state=model_embeds,
+            pooler_output=logits,
         )
 
 

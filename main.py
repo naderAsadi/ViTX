@@ -1,7 +1,13 @@
 import pytorch_lightning as pl
 from pytorch_lightning.strategies import DDPStrategy
 
-from vision_text import config_parser, get_dataloaders, get_loggers, get_method, get_model
+from vision_text import (
+    config_parser,
+    get_dataloaders,
+    get_loggers,
+    get_method,
+    get_model,
+)
 
 
 def main():

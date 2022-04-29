@@ -5,7 +5,7 @@ import torch.nn as nn
 from transformers import AutoModel, VisionTextDualEncoderModel
 
 from . import register_model
-from .dummy_dataclasses import VisionTextOutput
+from .dummy_dataclasses import VisionTextDualOutput
 from ..config import ModelConfig
 from ..losses import clip_loss, cosine_similarity
 
@@ -82,7 +82,6 @@ class VisionTextEncoder(torch.nn.Module):
         output_attentions: Optional[torch.Tensor] = None,
         output_hidden_states: Optional[torch.Tensor] = None,
     ):
-        vision_outputs = {}
         if "transformers" in str(type(self.vision_model)):
             vision_outputs = self.vision_model(
                 pixel_values=pixel_values,
@@ -91,10 +90,7 @@ class VisionTextEncoder(torch.nn.Module):
                 return_dict=True,
             )
         else:
-            (
-                vision_outputs["pooler_output"],
-                vision_outputs["last_hidden_state"],
-            ) = self.vision_model.return_hidden(pixel_values)
+            vision_outputs = self.vision_model(pixel_values)
 
         return vision_outputs
 
@@ -174,7 +170,7 @@ class VisionTextEncoder(torch.nn.Module):
             output_hidden_states=output_hidden_states,
         )
 
-        image_embeds = vision_outputs["pooler_output"]  # pooler_output
+        image_embeds = vision_outputs.pooler_output  # pooler_output
         image_embeds = self.visual_projection(image_embeds)
 
         text_embeds = text_outputs[1]  # pooler_output
@@ -191,7 +187,7 @@ class VisionTextEncoder(torch.nn.Module):
             logit_scale=self.logit_scale,
         )
 
-        return VisionTextOutput(
+        return VisionTextDualOutput(
             vision_pooled_embeds=image_embeds,
             text_pooled_embeds=text_embeds,
             vision_model_output=vision_outputs,

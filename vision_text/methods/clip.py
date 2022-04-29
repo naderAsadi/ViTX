@@ -3,12 +3,18 @@ import random
 
 import torch
 import pytorch_lightning as pl
-from transformers import CLIPTokenizer, CLIPVisionModel, CLIPTextModel
+from transformers import (
+    CLIPTokenizer,
+    CLIPVisionModel,
+    CLIPTextModel,
+    CLIPVisionConfig,
+    CLIPTextConfig,
+)
 
 from . import register_method
 from .base import BaseMethod
 from ..config import Config, OptimizerConfig
-from ..models import VisionTextEncoder, VisionTextOutput
+from ..models import VisionTextEncoder, VisionTextDualOutput, get_model
 from ..losses import clip_loss
 from ..utils.metrics import get_retrieval_map, RetrievalMap
 
@@ -43,10 +49,10 @@ class CLIP(BaseMethod):
         Returns:
             CLIP: an instance of CLIP method class.
         """
-        vision_model = CLIPVisionModel.from_pretrained(config.model.vision_model.name)
-        text_model = CLIPTextModel.from_pretrained(config.model.text_model.name)
+        vision_model = get_model(model_config=config.model.vision_model)
+        text_model = get_model(model_config=config.model.text_model)
 
-        model = VisionTextEncoder(
+        trunk_model = VisionTextEncoder(
             vision_model=vision_model,
             text_model=text_model,
             vision_embed_dim=config.model.vision_model.embed_dim,
@@ -58,7 +64,7 @@ class CLIP(BaseMethod):
         tokenizer = CLIPTokenizer.from_pretrained(config.model.text_model.tokenizer)
 
         return cls(
-            trunk=model,
+            trunk=trunk_model,
             tokenizer=tokenizer,
             max_token_length=config.model.text_model.max_token_length,
             trunk_optim_config=config.model.optimizer,
@@ -101,7 +107,7 @@ class CLIP(BaseMethod):
 
         return loss
 
-    def _compute_loss(self, outputs: VisionTextOutput) -> torch.FloatTensor:
+    def _compute_loss(self, outputs: VisionTextDualOutput) -> torch.FloatTensor:
 
         return clip_loss(outputs.logits_per_text)
 

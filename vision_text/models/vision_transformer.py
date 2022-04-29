@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from . import register_model
+from .dummy_dataclasses import ModelOutput
 
 
 class LayerNorm(nn.LayerNorm):
@@ -141,12 +142,12 @@ class VisualTransformer(nn.Module):
         x = self.transformer(x)
         x = x.permute(1, 0, 2)  # LND -> NLD
 
-        x = self.ln_post(x[:, 0, :])
+        cls_embeds = self.ln_post(x[:, 0, :])
 
         if self.proj is not None:
-            x = x @ self.proj
+            cls_embeds = cls_embeds @ self.proj
 
-        return x
+        return ModelOutput(pooler_output=cls_embeds, last_hidden_state=x)
 
 
 @register_model("vit_tiny_patch16")

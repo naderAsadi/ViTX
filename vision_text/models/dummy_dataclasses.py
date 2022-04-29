@@ -5,22 +5,14 @@ import torch
 
 
 @dataclass
-class VisionOutput:
-    loss: Optional[torch.FloatTensor] = None
-    vision_pooled_embeds: torch.FloatTensor = None
-    vision_model_output: torch.FloatTensor = None
-    logits: Optional[torch.FloatTensor] = None
+class ModelOutput:
+    pooled_last_hidden: torch.FloatTensor = None
+    last_hidden_state: torch.FloatTensor = None
+    pooler_output: torch.FloatTensor = None
 
 
 @dataclass
-class TextOutput:
-    loss: Optional[torch.FloatTensor] = None
-    text_pooled_embeds: torch.FloatTensor = None
-    text_model_output: torch.FloatTensor = None
-
-
-@dataclass
-class VisionTextOutput:
+class VisionTextDualOutput:
     loss: Optional[torch.FloatTensor] = None
     vision_pooled_embeds: torch.FloatTensor = None
     text_pooled_embeds: torch.FloatTensor = None
