@@ -1,5 +1,5 @@
 vision_model:
-  name: "vit_large_patch14"
+  name: "resnet101"
   pretrained: False
   embed_dim: 1024
 

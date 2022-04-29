@@ -1,5 +1,5 @@
 vision_model:
-  name: "vit_base_patch32"
+  name: "resnet50"
   pretrained: False
   embed_dim: 768
 

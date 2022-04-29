@@ -28,7 +28,6 @@ class OptimizerConfig:
 class VisionModelConfig:
     name: str = "openai/clip-vit-base-patch32"  # openai/clip-vit-large-patch14
     pretrained: bool = True
-    from_huggingface: bool = True
     embed_dim: int = 768
 
 
@@ -37,7 +36,6 @@ class TextModelConfig:
     name: str = "openai/clip-vit-base-patch32"  # openai/clip-vit-large-patch14
     tokenizer: str = "openai/clip-vit-base-patch32"
     pretrained: bool = True
-    from_huggingface: bool = True
     vocab_size: int = 49408
     embed_dim: int = 512
     n_hidden_layers: int = 12

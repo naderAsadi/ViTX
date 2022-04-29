@@ -50,29 +50,33 @@ def register_model(name, bypass_checks=False):
     return register_model_cls
 
 
-def get_model(model_config: Union[VisionModelConfig, TextModelConfig], *args, **kwargs):
+def get_model(model_config: Union[VisionModelConfig, TextModelConfig], **kwargs):
 
-    if model_config.from_huggingface:
-        if "tokenizer" not in model_config.keys():
-            model = CLIPVisionModel.from_pretrained(model_config.name)
+    if model_config.name in MODEL_REGISTRY:
+        return MODEL_REGISTRY[model_config.name](
+            output_dim=model_config.embed_dim,
+            pretrained=model_config.pretrained,
+            **kwargs,
+        )
+
+    model = None
+    if "tokenizer" not in model_config.keys():
+        model = CLIPVisionModel.from_pretrained(model_config.name)
+    else:
+        if model_config.pretrained:
+            model = CLIPTextModel.from_pretrained(model_config.name)
         else:
-            if model_config.pretrained:
-                model = CLIPTextModel.from_pretrained(model_config.name)
-            else:
-                text_model = CLIPTextModel(
-                    CLIPTextConfig(
-                        vocab_size=model_config.vocab_size,
-                        hidden_size=model_config.embed_dim,
-                        num_hidden_layers=model_config.n_hidden_layers,
-                        num_attention_heads=model_config.n_attention_heads,
-                        max_position_embeddings=model_config.max_token_length,
-                    )
+            model = CLIPTextModel(
+                CLIPTextConfig(
+                    vocab_size=model_config.vocab_size,
+                    hidden_size=model_config.embed_dim,
+                    num_hidden_layers=model_config.n_hidden_layers,
+                    num_attention_heads=model_config.n_attention_heads,
+                    max_position_embeddings=model_config.max_token_length,
                 )
+            )
 
-        return model
-
-    assert model_config.name in MODEL_REGISTRY, f"unknown model: {model_config.name}"
-    model = MODEL_REGISTRY[model_config.name](*args, **kwargs)
+    assert model is not None, f"unknown model: {model_config.name}"
 
     return model
 
