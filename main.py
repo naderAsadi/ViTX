@@ -1,13 +1,7 @@
-import torch
-from torch.utils.data import DataLoader
-import torchvision.transforms as T
 import pytorch_lightning as pl
 from pytorch_lightning.strategies import DDPStrategy
 
-from transformers import CLIPVisionModel, CLIPTextModel
-
-from vision_text import config_parser, get_dataloaders, get_loggers, get_method
-from vision_text.models import VisionTextModel
+from vision_text import config_parser, get_dataloaders, get_loggers, get_method, get_model
 
 
 def main():

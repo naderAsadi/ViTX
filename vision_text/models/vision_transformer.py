@@ -8,6 +8,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from . import register_model
+
 
 class LayerNorm(nn.LayerNorm):
     """Subclass torch's LayerNorm to handle fp16."""
@@ -147,6 +149,7 @@ class VisualTransformer(nn.Module):
         return x
 
 
+@register_model("vit_tiny_patch16")
 def vit_tiny_patch16(
     image_size: Optional[int] = 224,
     output_dim: Optional[int] = 512,
@@ -165,6 +168,7 @@ def vit_tiny_patch16(
     )
 
 
+@register_model("vit_small_patch16")
 def vit_small_patch16(
     image_size: Optional[int] = 224,
     output_dim: Optional[int] = 512,
@@ -183,6 +187,7 @@ def vit_small_patch16(
     )
 
 
+@register_model("vit_small_patch32")
 def vit_small_patch32(
     image_size: Optional[int] = 224,
     output_dim: Optional[int] = 512,
@@ -201,6 +206,7 @@ def vit_small_patch32(
     )
 
 
+@register_model("vit_base_patch16")
 def vit_base_patch16(
     image_size: Optional[int] = 224,
     output_dim: Optional[int] = 512,
@@ -221,6 +227,7 @@ def vit_base_patch16(
     )
 
 
+@register_model("vit_base_patch32")
 def vit_base_patch32(
     image_size: Optional[int] = 224,
     output_dim: Optional[int] = 512,
@@ -241,6 +248,7 @@ def vit_base_patch32(
     )
 
 
+@register_model("vit_large_patch14")
 def vit_large_patch14(
     image_size: Optional[int] = 224,
     output_dim: Optional[int] = 512,
@@ -259,6 +267,7 @@ def vit_large_patch14(
     )
 
 
+@register_model("vit_large_patch16")
 def vit_large_patch16(
     image_size: Optional[int] = 224,
     output_dim: Optional[int] = 512,
@@ -280,6 +289,7 @@ def vit_large_patch16(
     )
 
 
+@register_model("vit_large_patch32")
 def vit_large_patch32(
     image_size: Optional[int] = 224,
     output_dim: Optional[int] = 512,
@@ -298,6 +308,7 @@ def vit_large_patch32(
     )
 
 
+@register_model("vit_huge_patch14")
 def vit_huge_patch14(
     image_size: Optional[int] = 224,
     output_dim: Optional[int] = 512,
@@ -316,6 +327,7 @@ def vit_huge_patch14(
     )
 
 
+@register_model("vit_giant_patch14")
 def vit_giant_patch14(
     image_size: Optional[int] = 224,
     output_dim: Optional[int] = 512,
@@ -332,4 +344,3 @@ def vit_giant_patch14(
         output_dim=output_dim,
         **kwargs
     )
-

@@ -4,48 +4,33 @@ import torch.nn as nn
 
 from transformers import AutoModel, VisionTextDualEncoderModel
 
+from . import register_model
 from .dummy_dataclasses import VisionTextOutput
 from ..config import ModelConfig
 from ..losses import clip_loss, cosine_similarity
 
 
-class VisionTextModel(torch.nn.Module):
+@register_model("vision_text_encoder")
+class VisionTextEncoder(torch.nn.Module):
     def __init__(
         self,
-        model_config: ModelConfig,
-        vision_model: Optional[nn.Module] = None,
-        text_model: Optional[nn.Module] = None,
+        vision_model: nn.Module,
+        text_model: nn.Module,
+        vision_embed_dim: int,
+        text_embed_dim: int,
+        projection_dim: Optional[int] = 512,
+        logit_scale_init_value: Optional[float] = 2.6592,
     ):
-        super(VisionTextModel, self).__init__()
-
-        self.config = model_config
-
-        if vision_model is None:
-            if self.config.vision_model.name is None:
-                raise ValueError(
-                    "If `vision_model` is not passed as an argument, vision model `name` should be defined in the config under `model.vision_model`"
-                )
-            vision_model = AutoModel.from_pretrained(
-                pretrained_model_name_or_path=self.config.vision_model.name
-            )
-
-        if text_model is None:
-            if self.config.text_model.name is None:
-                raise ValueError(
-                    "If `text_model` is not passed as an argument, text model `name` should be defined in the config under `model.text_model`"
-                )
-            text_model = AutoModel.from_pretrained(
-                pretrained_model_name_or_path=self.config.text_model.name
-            )
+        super(VisionTextEncoder, self).__init__()
 
         # Models
         self.text_model = text_model
         self.vision_model = vision_model
 
         # Embedding dimensions
-        self.vision_embed_dim = self.config.vision_model.embed_dim
-        self.text_embed_dim = self.config.text_model.embed_dim
-        self.projection_dim = self.config.projection_dim
+        self.vision_embed_dim = vision_embed_dim
+        self.text_embed_dim = text_embed_dim
+        self.projection_dim = projection_dim
 
         # Heads
         self.visual_projection = nn.Linear(
@@ -54,12 +39,42 @@ class VisionTextModel(torch.nn.Module):
         self.text_projection = nn.Linear(
             self.text_embed_dim, self.projection_dim, bias=False
         )
-        self.logit_scale = nn.Parameter(
-            torch.ones([]) * self.config.logit_scale_init_value
-        )
+        self.logit_scale = nn.Parameter(torch.ones([]) * logit_scale_init_value)
 
-    def from_pretrained(self, model_config: ModelConfig):
-        pass
+    @classmethod
+    def from_config(
+        cls,
+        model_config: ModelConfig,
+        vision_model: Optional[nn.Module] = None,
+        text_model: Optional[nn.Module] = None,
+    ) -> "VisionTextEncoder":
+
+        if vision_model is None:
+            if model_config.vision_model.name is None:
+                raise ValueError(
+                    "If `vision_model` is not passed as an argument, vision model `name` should be defined in the config under `model.vision_model`"
+                )
+            vision_model = AutoModel.from_pretrained(
+                pretrained_model_name_or_path=model_config.vision_model.name
+            )
+
+        if text_model is None:
+            if model_config.text_model.name is None:
+                raise ValueError(
+                    "If `text_model` is not passed as an argument, text model `name` should be defined in the config under `model.text_model`"
+                )
+            text_model = AutoModel.from_pretrained(
+                pretrained_model_name_or_path=model_config.text_model.name
+            )
+
+        return cls(
+            vision_model=vision_model,
+            text_model=text_model,
+            vision_embed_dim=model_config.vision_model.embed_dim,
+            text_embed_dim=model_config.text_model.embed_dim,
+            projection_dim=model_config.projection_dim,
+            logit_scale_init_value=model_config.logit_scale_init_value,
+        )
 
     def _forward_vision_model(
         self,

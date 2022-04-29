@@ -8,7 +8,7 @@ from transformers import CLIPTokenizer, CLIPVisionModel, CLIPTextModel
 from . import register_method
 from .base import BaseMethod
 from ..config import Config, OptimizerConfig
-from ..models import VisionTextModel, VisionOutput, VisionTextOutput
+from ..models import VisionTextEncoder, VisionTextOutput
 from ..losses import clip_loss
 from ..utils.metrics import get_retrieval_map, RetrievalMap
 
@@ -17,7 +17,7 @@ from ..utils.metrics import get_retrieval_map, RetrievalMap
 class CLIP(BaseMethod):
     def __init__(
         self,
-        trunk: VisionTextModel,
+        trunk: VisionTextEncoder,
         tokenizer: CLIPTokenizer,
         max_token_length: Optional[int] = 77,
         trunk_optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
@@ -46,8 +46,13 @@ class CLIP(BaseMethod):
         vision_model = CLIPVisionModel.from_pretrained(config.model.vision_model.name)
         text_model = CLIPTextModel.from_pretrained(config.model.text_model.name)
 
-        model = VisionTextModel(
-            model_config=config.model, vision_model=vision_model, text_model=text_model
+        model = VisionTextEncoder(
+            vision_model=vision_model,
+            text_model=text_model,
+            vision_embed_dim=config.model.vision_model.embed_dim,
+            text_embed_dim=config.model.text_model.embed_dim,
+            projection_dim=config.model.projection_dim,
+            logit_scale_init_value=config.model.logit_scale_init_value,
         )
 
         tokenizer = CLIPTokenizer.from_pretrained(config.model.text_model.tokenizer)
