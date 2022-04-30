@@ -18,10 +18,13 @@ class DataConfig:
 
 @dataclass
 class OptimizerConfig:
-    name: str = "sgd"
+    name: str = "SGD"
     lr: float = 5e-3
     momentum: float = 0.9
     weight_decay: float = 1e-4
+    beta1: float = 0.9
+    beta2: float = 0.999
+    eps: float = 1e-8
 
 
 @dataclass

@@ -3,13 +3,7 @@ import random
 
 import torch
 import pytorch_lightning as pl
-from transformers import (
-    CLIPTokenizer,
-    CLIPVisionModel,
-    CLIPTextModel,
-    CLIPVisionConfig,
-    CLIPTextConfig,
-)
+from transformers import CLIPTokenizer
 
 from . import register_method
 from .base import BaseMethod

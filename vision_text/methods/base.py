@@ -6,6 +6,7 @@ import pytorch_lightning as pl
 
 from ..config import Config, OptimizerConfig
 from ..models import ModelOutput, VisionTextDualOutput
+from ..utils import get_optimizer
 
 
 class BaseMethod(pl.LightningModule):
@@ -37,23 +38,16 @@ class BaseMethod(pl.LightningModule):
         raise NotImplementedError
 
     def configure_optimizers(self):
-        trunk_optim = torch.optim.SGD(
-            params=self.trunk.parameters(),
-            lr=self.trunk_optim_config.lr,
-            momentum=self.trunk_optim_config.momentum,
-            weight_decay=self.trunk_optim_config.weight_decay,
-        )
-        optimizers = [trunk_optim]
+        optimizers = [
+            get_optimizer(self.trunk.parameters(), optim_config=self.trunk_optim_config)
+        ]
 
         if self.head is not None:
-            head_optim = torch.optim.SGD(
-                params=self.head.parameters(),
-                lr=self.head_optim_config.lr,
-                momentum=self.head_optim_config.momentum,
-                weight_decay=self.head_optim_config.weight_decay,
+            optimizers.append(
+                get_optimizer(
+                    self.head.parameters(), optim_config=self.head_optim_config
+                )
             )
-
-            optimizers.append(head_optim)
 
         return optimizers
 

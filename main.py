@@ -40,7 +40,7 @@ def main():
         strategy=DDPStrategy(find_unused_parameters=False),
         max_epochs=config.train.n_epochs,
         check_val_every_n_epoch=config.train.check_val_every_n_epoch,
-        callbacks=[checkpoint_callback]
+        callbacks=[checkpoint_callback],
     )
 
     trainer.fit(
