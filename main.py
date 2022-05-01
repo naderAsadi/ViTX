@@ -25,12 +25,12 @@ def main():
     method = get_method(config=config)
 
     checkpoint_callback = ModelCheckpoint(
-        save_top_k=3,
+        save_top_k=1,
         monitor="validation/loss",
         mode="min",
         dirpath=config.model.checkpoint_root,
         filename=f"{config.method}-{config.model.vision_model.name}-{config.data.dataset}-"
-        + "{epoch:02d}-{val_loss:.2f}",
+        + "{epoch:02d}",
     )
 
     trainer = pl.Trainer(
@@ -46,7 +46,10 @@ def main():
     trainer.fit(
         model=method, train_dataloaders=train_loader, val_dataloaders=test_loader
     )
-    trainer.test(model=method, dataloaders=test_loader)
+
+    trainer.save_checkpoint(
+        filepath=f"{config.model.checkpoint_root}/{config.method}-{config.model.vision_model.name}-{config.data.dataset}.pt"
+    )
 
 
 if __name__ == "__main__":
