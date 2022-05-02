@@ -150,7 +150,6 @@ class VisionTextEncoder(torch.nn.Module):
         pixel_values,
         attention_mask=None,
         position_ids=None,
-        return_loss=None,
         token_type_ids=None,
         output_attentions=None,
         output_hidden_states=None,
