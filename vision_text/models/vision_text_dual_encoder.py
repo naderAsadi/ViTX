@@ -121,7 +121,6 @@ class VisionTextEncoder(torch.nn.Module):
         input_ids,
         attention_mask=None,
         position_ids=None,
-        token_type_ids=None,
         output_attentions=None,
         output_hidden_states=None,
     ):
@@ -146,27 +145,19 @@ class VisionTextEncoder(torch.nn.Module):
 
     def forward(
         self,
-        input_ids,
-        pixel_values,
-        attention_mask=None,
-        position_ids=None,
-        token_type_ids=None,
-        output_attentions=None,
-        output_hidden_states=None,
+        input_ids: torch.FloatTensor,
+        pixel_values: torch.FloatTensor,
+        attention_mask: Optional[torch.FloatTensor] = None,
+        return_similarity_logits: Optional[bool] = True,
     ):
 
         vision_outputs = self._forward_vision_model(
             pixel_values=pixel_values,
-            output_attentions=output_attentions,
-            output_hidden_states=output_hidden_states,
         )
 
         text_outputs = self.text_model(
             input_ids=input_ids,
             attention_mask=attention_mask,
-            position_ids=position_ids,
-            output_attentions=output_attentions,
-            output_hidden_states=output_hidden_states,
         )
 
         image_embeds = vision_outputs.pooler_output  # pooler_output
@@ -179,18 +170,19 @@ class VisionTextEncoder(torch.nn.Module):
         image_embeds = image_embeds / image_embeds.norm(dim=-1, keepdim=True)
         text_embeds = text_embeds / text_embeds.norm(dim=-1, keepdim=True)
 
-        # cosine similarity as logits
-        logits_per_text, logits_per_image = cosine_similarity(
-            text_embeds=text_embeds,
-            image_embeds=image_embeds,
-            logit_scale=self.logit_scale,
-        )
-
-        return VisionTextDualOutput(
+        outputs = VisionTextDualOutput(
             vision_pooled_embeds=image_embeds,
             text_pooled_embeds=text_embeds,
             vision_model_output=vision_outputs,
             text_model_output=text_outputs,
-            logits_per_image=logits_per_image,
-            logits_per_text=logits_per_text,
         )
+
+        # cosine similarity as logits
+        if return_similarity_logits:
+            outputs.logits_per_text, outputs.logits_per_image = cosine_similarity(
+                text_embeds=text_embeds,
+                image_embeds=image_embeds,
+                logit_scale=self.logit_scale,
+            )
+
+        return outputs
