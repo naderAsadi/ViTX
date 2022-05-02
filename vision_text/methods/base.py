@@ -55,7 +55,13 @@ class BaseMethod(pl.LightningModule):
 
         super().on_before_batch_transfer(batch, dataloader_idx)
 
-    def forward(self, input_ids, attention_mask, pixel_values):
+    def forward(
+        self,
+        pixel_values: torch.FloatTensor,
+        input_ids: torch.FloatTensor,
+        attention_mask: torch.FloatTensor,
+        return_loss: Optional[bool] = True,
+    ):
         outputs = self.trunk(
             input_ids=input_ids,
             attention_mask=attention_mask,
@@ -63,8 +69,9 @@ class BaseMethod(pl.LightningModule):
             return_loss=False,
         )
 
-        loss = self._compute_loss(outputs)
-        outputs.loss = loss
+        if return_loss:
+            loss = self._compute_loss(outputs)
+            outputs.loss = loss
 
         return outputs
 

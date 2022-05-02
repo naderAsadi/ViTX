@@ -82,15 +82,14 @@ class CLIP(BaseMethod):
         pixel_values, text_input_ids, text_attention_mask = batch
         metrics = {}
 
-        outputs = self.trunk(
+        outputs = self.forward(
+            pixel_values=pixel_values,
             input_ids=text_input_ids,
             attention_mask=text_attention_mask,
-            pixel_values=pixel_values,
-            return_loss=False,
+            return_loss=True,
         )
-        loss = self._compute_loss(outputs)
 
-        metrics["train/loss"] = loss
+        metrics["train/loss"] = outputs.loss
 
         if self.log_train_acc:
             retrieval_map = get_retrieval_map(logits_per_text=outputs.logits_per_text)
@@ -99,7 +98,7 @@ class CLIP(BaseMethod):
 
         self.log_dict(metrics, sync_dist=True)
 
-        return loss
+        return outputs.loss
 
     def _compute_loss(self, outputs: VisionTextDualOutput) -> torch.FloatTensor:
 
@@ -122,26 +121,25 @@ class CLIP(BaseMethod):
     def _shared_eval_step(self, batch, batch_idx):
         pixel_values, text_input_ids, text_attention_mask = batch
 
-        outputs = self.trunk(
+        outputs = self.forward(
+            pixel_values=pixel_values,
             input_ids=text_input_ids,
             attention_mask=text_attention_mask,
-            pixel_values=pixel_values,
-            return_loss=False,
+            return_loss=True,
         )
 
-        loss = self._compute_loss(outputs)
         retrieval_map = get_retrieval_map(logits_per_text=outputs.logits_per_text)
         acc = retrieval_map.acc_per_text
 
-        return loss, acc
+        return outputs.loss, acc
 
     def predict_step(self, batch, batch_idx):
         pixel_values, text_input_ids, text_attention_mask = batch
 
-        outputs = self.trunk(
+        outputs = self.forward(
+            pixel_values=pixel_values,
             input_ids=text_input_ids,
             attention_mask=text_attention_mask,
-            pixel_values=pixel_values,
             return_loss=False,
         )
 
