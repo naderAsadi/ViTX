@@ -61,7 +61,6 @@ class SimCLR(BaseMethod):
         return outputs
 
     def training_step(self, batch, batch_idx):
-        print(batch)
         pixel_values = batch[0]
         metrics = {}
 
@@ -91,7 +90,6 @@ class SimCLR(BaseMethod):
 
     def _shared_eval_step(self, batch, batch_idx):
         pixel_values = batch[0]
-        print(batch)
 
         outputs = self.forward(
             pixel_values=pixel_values,
@@ -99,3 +97,13 @@ class SimCLR(BaseMethod):
         )
 
         return outputs.loss
+
+    def predict_step(self, batch, batch_idx):
+        pixel_values = batch[0]
+
+        outputs = self.forward(
+            pixel_values=pixel_values,
+            return_loss=False,
+        )
+
+        return outputs
