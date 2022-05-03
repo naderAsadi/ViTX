@@ -51,10 +51,6 @@ class BaseMethod(pl.LightningModule):
 
         return optimizers
 
-    def on_before_batch_transfer(self, batch, dataloader_idx):
-
-        super().on_before_batch_transfer(batch, dataloader_idx)
-
     def forward(
         self,
         pixel_values: torch.FloatTensor,

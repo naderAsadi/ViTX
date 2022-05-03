@@ -59,6 +59,9 @@ class ModelConfig:
 @dataclass
 class HeadConfig:
     name: str = "mlp"
+    hidden_dim: int = 1024
+    output_dim: int = 512
+    n_layers: int = 2
     optimizer: OptimizerConfig = OptimizerConfig()
 
 

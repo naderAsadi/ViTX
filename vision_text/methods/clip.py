@@ -1,8 +1,6 @@
 from typing import Optional, Union
-import random
 
 import torch
-import pytorch_lightning as pl
 from transformers import CLIPTokenizer
 
 from . import register_method

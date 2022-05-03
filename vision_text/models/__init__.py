@@ -85,6 +85,7 @@ def get_model(model_config: Union[VisionModelConfig, TextModelConfig], **kwargs)
 import_all_modules(FILE_ROOT, "vision_text.models")
 
 
+from .mlp import LinearClassifier, MLP
 from .resnet import resnet18, resnet34, resnet50, resnet101, resnet152
 from .vision_transformer import (
     Transformer,
