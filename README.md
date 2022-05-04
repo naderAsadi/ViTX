@@ -2,6 +2,9 @@
 
 **vision-text** is a codebase on top of [PyTorch Lightning](https://www.pytorchlightning.ai/) and HuggingFace [Transformers](https://huggingface.co/) for Cross-Modal Perception research.
 
+## How To Use
+
+
 ## Reading The Commits
 Here is a reference to what each emoji in the commits means:
 
