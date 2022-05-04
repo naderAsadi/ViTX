@@ -1,6 +1,19 @@
-# Overview
+## Overview
 
 **vision-text** is a codebase on top of [PyTorch Lightning](https://www.pytorchlightning.ai/) and HuggingFace [Transformers](https://huggingface.co/) for Cross-Modal Perception research.
+
+## How To Use
+
+<details>
+  <summary>Training examples</summary>
+  
+Train CLIP with ViT-base on COCO Captions dataset:
+
+```
+python main.py +data=coco +model=vit-b
+```
+  
+</details>
 
 ## Reading The Commits
 Here is a reference to what each emoji in the commits means:
