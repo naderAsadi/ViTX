@@ -1,10 +1,12 @@
+defaults:
+  - _self_
+  - transform: basic
+
 dataset: "mpi"
 train_images_path: "../datasets/mpi_dataset/images/train/"
 val_images_path: "../datasets/mpi_dataset/images/val/"
 train_ann_path: "../datasets/mpi_dataset/annotations/annotations-original.csv"
 val_ann_path: "../datasets/mpi_dataset/annotations/annotations-original.csv"
 n_workers: 8
-image_size: 224
-resize_ratio: 0.75
 n_frames: 1
 

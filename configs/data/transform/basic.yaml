@@ -1,0 +1,5 @@
+image_size: 224
+resize_ratio: 0.75
+horizontal_flip: 0.0
+color_jitter: 0.0
+random_grayscale: 0.0

@@ -1,0 +1,4 @@
+name: "vit_base_patch32"
+pretrained: False
+embed_dim: 768
+

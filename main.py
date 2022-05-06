@@ -26,8 +26,8 @@ def main():
 
     checkpoint_callback = ModelCheckpoint(
         save_top_k=1,
-        monitor="validation/loss",
-        mode="min",
+        monitor="epoch",
+        mode="max",
         dirpath=config.model.checkpoint_root,
         filename=f"{config.method}-{config.model.vision_model.name}-{config.data.dataset}-"
         + "{epoch:02d}",

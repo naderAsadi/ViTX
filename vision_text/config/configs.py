@@ -3,6 +3,15 @@ from typing import Dict, List, Optional, Tuple
 
 
 @dataclass
+class TransformConfig:
+    image_size: int = 224
+    resize_ratio: float = 0.75
+    horizontal_flip: float = 0.5
+    color_jitter: float = 0.4
+    random_grayscale: float = 0.2
+
+
+@dataclass
 class DataConfig:
     dataset: str = "coco"
     train_images_path: str = "../datasets/coco-caption/images/train/"
@@ -11,9 +20,7 @@ class DataConfig:
     val_ann_path: str = "../datasets/coco-caption/annotations/captions_val2014.json"
     n_workers: int = 8
     n_frames: int = 8
-    # image_transform
-    image_size: int = 224
-    resize_ratio: float = 0.75
+    transform: TransformConfig = TransformConfig()
 
 
 @dataclass
@@ -68,7 +75,7 @@ class HeadConfig:
 @dataclass
 class TrainConfig:
     batch_size: int = 64
-    n_epochs: int = 32
+    n_epochs: int = 100
     check_val: bool = True
     check_val_every_n_epoch: int = 5
     # Distributed Training

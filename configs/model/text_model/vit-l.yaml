@@ -1,0 +1,8 @@
+name: "openai/clip-vit-large-patch14"
+tokenizer: "openai/clip-vit-large-patch14"
+pretrained: False
+vocab_size: 49408
+embed_dim: 1024
+n_hidden_layers: 24
+n_attention_heads: 16
+max_token_length: 77

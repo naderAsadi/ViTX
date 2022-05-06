@@ -1,0 +1,3 @@
+name: "resnet101"
+pretrained: False
+embed_dim: 1024

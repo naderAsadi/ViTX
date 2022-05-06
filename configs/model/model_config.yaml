@@ -1,0 +1,9 @@
+defaults:
+  - _self_
+  - vision_model: vit-b
+  - text_model: vit-b
+  - optimizer: sgd
+
+projection_dim: 512
+logit_scale_init_value: 2.6592
+checkpoint_root: "checkpoints/"

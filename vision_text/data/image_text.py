@@ -8,6 +8,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms as T
 
 from . import register_dataset
+from .helper import get_image_transforms
 from ..config import DataConfig
 
 
@@ -89,11 +90,14 @@ class ImageTextDataset(Dataset):
             images_path = data_config.val_images_path
             ann_file_path = data_config.val_ann_path
 
+        image_transform = get_image_transforms(transform_config=data_config.transform)
+
         return cls(
             images_path=images_path,
             ann_file_path=ann_file_path,
-            image_size=data_config.image_size,
-            resize_ratio=data_config.resize_ratio,
+            image_transform=image_transform,
+            image_size=data_config.transform.image_size,
+            resize_ratio=data_config.transform.resize_ratio,
         )
 
     def __len__(self):
