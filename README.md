@@ -10,7 +10,7 @@
 Train CLIP with ViT-base on COCO Captions dataset:
 
 ```
-python main.py +data=coco +model=vit-b
+python main.py data=coco model/vision_model=vit-b  model/text_model=vit-b
 ```
   
 </details>
