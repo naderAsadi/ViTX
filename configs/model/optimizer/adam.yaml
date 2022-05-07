@@ -1,5 +1,5 @@
 name: "Adam"
-lr: 0.001
+lr: 1e-5
 beta1: 0.9
 beta2: 0.999
 weight_decay: 0.
