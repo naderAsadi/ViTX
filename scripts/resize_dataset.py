@@ -1,6 +1,29 @@
 import argparse
 from pathlib import Path
 from PIL import Image
+from multiprocessing import Value
+from multiprocessing.pool import ThreadPool
+
+
+def resize(batch):
+    key, image_path = batch
+    try:
+        img = Image.open(image_path)
+        img = img.resize((args.image_size, args.image_size))
+        img.save(f"{args.target_path}/{key}.jpg")
+
+        global counter
+        with counter.get_lock():
+            counter.value += 1
+    except:
+        pass
+
+    print(f"Resized {counter.value}/{num_images} images", end="\r")
+
+
+def init(args):
+    global counter
+    counter = args
 
 
 def main(args):
@@ -14,26 +37,25 @@ def main(args):
     ]
     image_files = {str(file.parts[-1].split(".")[0]): file for file in image_files}
 
-    c = 0
-    for key, image_path in image_files.items():
-        try:
-            img = Image.open(image_path)
-            img = img.resize((args.image_size, args.image_size))
-            img.save(f"{args.target_path}/{key}.jpg")
-            c += 1
-        except:
-            continue
-        
-        print(f"Resized {c}/{len(image_files.keys())} images", end='\r')
-    
-    print(f"{len(image_files.keys()) - c} / {len(image_files.keys())} images were corrupted.")
+    global num_images
+    num_images = len(image_files.keys())
+    # initialize a cross-process counter
+    counter = Value("i", 0)
+
+    thread_pool = ThreadPool(
+        processes=args.n_threads, initializer=init, initargs=(counter,)
+    )
+    pooled_output = thread_pool.map(resize, image_files.items())
+
+    print(f"{num_images - counter.value} / {num_images} images were corrupted.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--images_path', type=str, help='Path to the folder containing dataset image files.')
-    parser.add_argument('--target_path', type=str, help='Path to the folder where resized images will be stored.')
-    parser.add_argument('--image_size', type=int, default=336, help='Target image size.')
+    parser.add_argument("--images_path", type=str)
+    parser.add_argument("--target_path", type=str)
+    parser.add_argument("--image_size", type=int, default=336)
+    parser.add_argument("--n_threads", type=int, default=8)
     args = parser.parse_args()
 
     main(args=args)
