@@ -60,13 +60,9 @@ class ImageTextDataset(Dataset):
         if image_transform is None:
             image_transform = T.Compose(
                 [
-                    T.RandomResizedCrop(
-                        image_size, scale=(resize_ratio, 1.0), ratio=(1.0, 1.0)
-                    ),
+                    T.Resize((image_size, image_size)),
                     T.ToTensor(),
-                    T.Normalize(
-                        mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
-                    ),  # ImageNet mean and std
+                    T.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
                 ]
             )
         self.image_transform = image_transform
@@ -90,7 +86,9 @@ class ImageTextDataset(Dataset):
             images_path = data_config.val_images_path
             ann_file_path = data_config.val_ann_path
 
-        image_transform = get_image_transforms(transform_config=data_config.transform)
+        image_transform = get_image_transforms(
+            transform_config=data_config.transform, split=split
+        )
 
         return cls(
             images_path=images_path,

@@ -1,3 +1,4 @@
+from typing import Optional
 import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms as T
@@ -34,7 +35,28 @@ def get_dataloaders(config: Config, return_val_loader: bool = True):
     return train_loader
 
 
-def get_image_transforms(transform_config: TransformConfig):
+def get_image_transforms(
+    transform_config: TransformConfig, split: Optional[str] = None
+):
+    """_summary_
+
+    Args:
+        transform_config (TransformConfig): _description_
+        split (Optional[str], optional): _description_. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """
+
+    if split in ["val", "test"]:
+        return T.Compose(
+            [
+                T.Resize((transform_config.image_size, transform_config.image_size)),
+                T.ToTensor(),
+                T.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+            ]
+        )
+
     image_transforms = [
         T.RandomResizedCrop(
             transform_config.image_size,

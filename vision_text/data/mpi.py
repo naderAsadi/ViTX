@@ -67,13 +67,9 @@ class MPIVideoDataset(Dataset):
         if image_transform is None:
             image_transform = T.Compose(
                 [
-                    T.RandomResizedCrop(
-                        image_size, scale=(resize_ratio, 1.0), ratio=(1.0, 1.0)
-                    ),
+                    T.Resize(image_size),
                     T.ToTensor(),
-                    T.Normalize(
-                        mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
-                    ),  # ImageNet mean and std
+                    T.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
                 ]
             )
         self.image_transform = image_transform
