@@ -12,23 +12,18 @@ from ..utils import get_optimizer
 class BaseMethod(pl.LightningModule):
     def __init__(
         self,
-        trunk: Optional[nn.Module],
-        head: Optional[nn.Module] = None,
+        model: Optional[nn.Module],
         tokenizer: Optional = None,
         max_token_length: Optional[int] = 77,
-        trunk_optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
-        head_optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
+        optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
         log_train_acc: Optional[bool] = False,
     ):
         super().__init__()
 
-        self.trunk = trunk
-        self.head = head
+        self.model = model
         self.tokenizer = tokenizer
 
-        self.trunk_optim_config = trunk_optim_config
-        self.head_optim_config = head_optim_config
-
+        self.optim_config = optim_config
         self.max_token_length = max_token_length
         self.log_train_acc = log_train_acc
 
@@ -38,18 +33,7 @@ class BaseMethod(pl.LightningModule):
         raise NotImplementedError
 
     def configure_optimizers(self):
-        optimizers = [
-            get_optimizer(self.trunk.parameters(), optim_config=self.trunk_optim_config)
-        ]
-
-        if self.head is not None:
-            optimizers.append(
-                get_optimizer(
-                    self.head.parameters(), optim_config=self.head_optim_config
-                )
-            )
-
-        return optimizers
+        return get_optimizer(self.model.parameters(), optim_config=self.optim_config)
 
     def forward(
         self,
@@ -58,7 +42,7 @@ class BaseMethod(pl.LightningModule):
         attention_mask: torch.FloatTensor,
         return_loss: Optional[bool] = True,
     ):
-        outputs = self.trunk(
+        outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
             pixel_values=pixel_values,

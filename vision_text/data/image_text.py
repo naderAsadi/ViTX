@@ -22,6 +22,7 @@ class ImageTextDataset(Dataset):
         image_size: Optional[int] = 224,
         resize_ratio: Optional[float] = 0.75,
         shuffle: Optional[bool] = False,
+        n_views: Optional[int] = 1,
     ):
         """Create a image-text dataset from a directory with congruent text and image names.
 
@@ -67,6 +68,7 @@ class ImageTextDataset(Dataset):
             )
         self.image_transform = image_transform
         self.shuffle = shuffle
+        self.n_views = n_views
 
     @classmethod
     def from_config(
@@ -96,6 +98,7 @@ class ImageTextDataset(Dataset):
             image_transform=image_transform,
             image_size=data_config.transform.image_size,
             resize_ratio=data_config.transform.resize_ratio,
+            n_views=data_config.transform.n_views,
         )
 
     def __len__(self):
@@ -118,11 +121,14 @@ class ImageTextDataset(Dataset):
         key = self.keys[idx]
 
         caption = self.captions[key]
+
         try:
-            image = self.image_transform(
-                Image.open(self.image_files[key]).convert("RGB")
-            )
+            image = Image.open(self.image_files[key]).convert("RGB")
         except:
             return self.skip_sample(idx)
 
-        return image, caption
+        image_views = []
+        for n in range(self.n_views):
+            image_views.append(self.image_transform(image))
+
+        return torch.stack(image_views, dim=0).squeeze(), caption

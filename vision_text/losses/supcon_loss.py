@@ -67,6 +67,9 @@ class SupConLoss(nn.Module):
         )
         mask = mask * logits_mask
 
+        mask = mask.type_as(features)
+        logits_mask = logits_mask.type_as(features)
+
         # compute log_prob
         exp_logits = torch.exp(logits) * logits_mask
         log_prob = logits - torch.log(exp_logits.sum(1, keepdim=True))

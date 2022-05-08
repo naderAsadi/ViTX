@@ -15,19 +15,17 @@ from ..utils.metrics import get_retrieval_map, RetrievalMap
 class CLIP(BaseMethod):
     def __init__(
         self,
-        trunk: VisionTextEncoder,
+        model: VisionTextEncoder,
         tokenizer: CLIPTokenizer,
         max_token_length: Optional[int] = 77,
-        trunk_optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
-        head_optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
+        optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
         log_train_acc: Optional[bool] = False,
     ):
         super().__init__(
-            trunk=trunk,
+            model=model,
             tokenizer=tokenizer,
             max_token_length=max_token_length,
-            trunk_optim_config=trunk_optim_config,
-            head_optim_config=head_optim_config,
+            optim_config=optim_config,
             log_train_acc=log_train_acc,
         )
 
@@ -44,7 +42,7 @@ class CLIP(BaseMethod):
         vision_model = get_model(model_config=config.model.vision_model)
         text_model = get_model(model_config=config.model.text_model)
 
-        trunk_model = VisionTextEncoder(
+        model_model = VisionTextEncoder(
             vision_model=vision_model,
             text_model=text_model,
             vision_embed_dim=config.model.vision_model.embed_dim,
@@ -56,11 +54,10 @@ class CLIP(BaseMethod):
         tokenizer = CLIPTokenizer.from_pretrained(config.model.text_model.tokenizer)
 
         return cls(
-            trunk=trunk_model,
+            model=model_model,
             tokenizer=tokenizer,
             max_token_length=config.model.text_model.max_token_length,
-            trunk_optim_config=config.model.optimizer,
-            head_optim_config=config.head.optimizer,
+            optim_config=config.model.optimizer,
             log_train_acc=config.logger.log_train_acc,
         )
 

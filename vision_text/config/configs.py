@@ -9,6 +9,7 @@ class TransformConfig:
     horizontal_flip: float = 0.5
     color_jitter: float = 0.4
     random_grayscale: float = 0.2
+    n_views: int = 1
 
 
 @dataclass
@@ -64,15 +65,6 @@ class ModelConfig:
 
 
 @dataclass
-class HeadConfig:
-    name: str = "mlp"
-    hidden_dim: int = 1024
-    output_dim: int = 512
-    n_layers: int = 2
-    optimizer: OptimizerConfig = OptimizerConfig()
-
-
-@dataclass
 class TrainConfig:
     batch_size: int = 64
     n_epochs: int = 100
@@ -96,6 +88,5 @@ class Config:
     method: str = "clip"
     data: DataConfig = DataConfig()
     model: ModelConfig = ModelConfig()
-    head: HeadConfig = HeadConfig()
     train: TrainConfig = TrainConfig()
     logger: LoggerConfig = LoggerConfig()

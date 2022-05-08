@@ -3,8 +3,8 @@ defaults:
   - transform: basic
 
 dataset: "image_text"
-train_images_path: "../datasets/CC3M/images/train/"
-val_images_path: "../datasets/CC3M/images/val/"
-train_ann_path: "../datasets/CC3M/annotations/train_captions.tsv"
-val_ann_path: "../datasets/CC3M/annotations/val_captions.tsv"
+train_images_path: "../datasets/CC3M_336/images/train/"
+val_images_path: "../datasets/CC3M_336/images/val/"
+train_ann_path: "../datasets/CC3M_336/annotations/train_captions.tsv"
+val_ann_path: "../datasets/CC3M_336/annotations/val_captions.tsv"
 n_workers: 8

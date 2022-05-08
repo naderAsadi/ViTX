@@ -129,4 +129,4 @@ class MPIVideoDataset(Dataset):
             img = Image.open(image_file).convert("RGB")
             image_tensors.append(self.image_transform(img).unsqueeze(1))
 
-        return torch.stack(image_tensors, dim=1).squeeze(), caption
+        return torch.stack(image_tensors, dim=0).squeeze(), caption

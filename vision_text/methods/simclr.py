@@ -2,6 +2,7 @@ from typing import Optional, Union
 import torch
 import torch.nn as nn
 
+
 from . import register_method
 from .base import BaseMethod
 from ..config import Config, OptimizerConfig
@@ -13,49 +14,46 @@ from ..models import MLP, ModelOutput, get_model
 class SimCLR(BaseMethod):
     def __init__(
         self,
-        trunk: nn.Module,
-        head: Optional[nn.Module],
-        trunk_optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
-        head_optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
+        model: nn.Module,
+        optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
     ):
         super(SimCLR, self).__init__(
-            trunk=trunk,
-            head=head,
-            trunk_optim_config=trunk_optim_config,
-            head_optim_config=head_optim_config,
+            model=model,
+            optim_config=optim_config,
         )
 
-        self.loss_func = SupConLoss(temperature=0.2)
+        self.loss_func = SupConLoss(temperature=0.5)
 
     @classmethod
     def from_config(cls, config: Config) -> "SimCLR":
         model = get_model(model_config=config.model.vision_model)
-        head = MLP(
-            input_dim=config.model.vision_model.embed_dim,
-            hidden_dim=config.head.hidden_dim,
-            output_dim=config.head.output_dim,
-            n_layers=config.head.n_layers,
-        )
+
         return cls(
-            trunk=model,
-            head=head,
-            trunk_optim_config=config.model.optimizer,
-            head_optim_config=config.head.optimizer,
+            model=model,
+            optim_config=config.model.optimizer,
         )
-
-    def _compute_loss(self, outputs: ModelOutput) -> torch.FloatTensor:
-
-        return self.loss_func(features=outputs.pooler_output)
 
     def forward(
         self,
         pixel_values: torch.FloatTensor,
         return_loss: Optional[bool] = True,
     ):
-        outputs = self.trunk(pixel_values)
+        assert (
+            len(pixel_values.shape) == 5
+        ), "`pixel_values` needs to be [bsz, n_views, ...], at least 5 dimensions are required."
+
+        bsz = pixel_values.size(0)
+        images = pixel_values.reshape(-1, *pixel_values.shape[2:])
+
+        outputs = self.model(images)
+        features = outputs.pooler_output
+
+        features = nn.functional.normalize(features, dim=-1)
+        f1, f2 = torch.split(features, [bsz, bsz], dim=0)
+        features = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
 
         if return_loss:
-            loss = self._compute_loss(outputs)
+            loss = self.loss_func(features=features)
             outputs.loss = loss
 
         return outputs
