@@ -20,6 +20,7 @@ class CLIP(BaseMethod):
         max_token_length: Optional[int] = 77,
         optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
         log_train_acc: Optional[bool] = False,
+        topk: Optional[int] = 1,
     ):
         super().__init__(
             model=model,
@@ -28,6 +29,7 @@ class CLIP(BaseMethod):
             optim_config=optim_config,
             log_train_acc=log_train_acc,
         )
+        self.topk = topk
 
     @classmethod
     def from_config(cls, config: Config) -> "CLIP":
@@ -59,6 +61,7 @@ class CLIP(BaseMethod):
             max_token_length=config.model.text_model.max_token_length,
             optim_config=config.model.optimizer,
             log_train_acc=config.logger.log_train_acc,
+            topk=config.model.topk,
         )
 
     def on_before_batch_transfer(self, batch, dataloader_idx):
@@ -87,7 +90,9 @@ class CLIP(BaseMethod):
         metrics["train/loss"] = outputs.loss
 
         if self.log_train_acc:
-            retrieval_map = get_retrieval_map(logits_per_text=outputs.logits_per_text)
+            retrieval_map = get_retrieval_map(
+                logits_per_text=outputs.logits_per_text, topk=self.topk
+            )
             acc = retrieval_map.acc_per_text
             metrics["train/acc"] = acc
 
@@ -123,7 +128,9 @@ class CLIP(BaseMethod):
             return_loss=True,
         )
 
-        retrieval_map = get_retrieval_map(logits_per_text=outputs.logits_per_text)
+        retrieval_map = get_retrieval_map(
+            logits_per_text=outputs.logits_per_text, topk=self.topk
+        )
         acc = retrieval_map.acc_per_text
 
         return outputs.loss, acc

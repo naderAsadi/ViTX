@@ -8,6 +8,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms as T
 
 from . import register_dataset
+from .helper import get_image_transforms
 from ..config import DataConfig
 
 
@@ -21,6 +22,7 @@ class MPIVideoDataset(Dataset):
         image_transform: Optional = None,
         image_size: Optional[int] = 224,
         resize_ratio: Optional[float] = 0.75,
+        shuffle: Optional[bool] = False,
     ):
         """Create a image-text dataset from a directory with congruent text and image names.
 
@@ -73,6 +75,7 @@ class MPIVideoDataset(Dataset):
                 ]
             )
         self.image_transform = image_transform
+        self.shuffle = shuffle
 
     @classmethod
     def from_config(
@@ -92,12 +95,17 @@ class MPIVideoDataset(Dataset):
             images_path = data_config.val_images_path
             ann_file_path = data_config.val_ann_path
 
+        image_transform = get_image_transforms(
+            transform_config=data_config.transform, split=split
+        )
+
         return cls(
             images_path=images_path,
             ann_file_path=ann_file_path,
             n_frames=data_config.n_frames,
-            image_size=data_config.image_size,
-            resize_ratio=data_config.resize_ratio,
+            image_transform=image_transform,
+            image_size=data_config.transform.image_size,
+            resize_ratio=data_config.transform.resize_ratio,
         )
 
     def __len__(self):
