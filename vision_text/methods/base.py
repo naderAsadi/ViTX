@@ -42,22 +42,6 @@ class BaseMethod(pl.LightningModule):
         attention_mask: torch.FloatTensor,
         return_loss: Optional[bool] = True,
     ):
-        outputs = self.model(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            pixel_values=pixel_values,
-        )
-
-        if return_loss:
-            loss = self._compute_loss(outputs)
-            outputs.loss = loss
-
-        return outputs
-
-    def _compute_loss(
-        self, outputs: Union[ModelOutput, VisionTextDualOutput]
-    ) -> torch.FloatTensor:
-
         raise NotImplementedError
 
     def training_step(self, batch, batch_idx):

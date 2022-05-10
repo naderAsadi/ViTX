@@ -100,9 +100,36 @@ class CLIP(BaseMethod):
 
         return outputs.loss
 
-    def _compute_loss(self, outputs: VisionTextDualOutput) -> torch.FloatTensor:
+    def forward(
+        self,
+        pixel_values: torch.FloatTensor,
+        input_ids: torch.FloatTensor,
+        attention_mask: torch.FloatTensor,
+        return_loss: Optional[bool] = True,
+    ):
+        assert (
+            len(pixel_values.shape) < 6
+        ), "`pixel_values` shape needs to be either [bsz, 3, img_size, img_size] or [bsz, n_views, 3, img_size, img_size]"
 
-        return clip_loss(outputs.logits_per_text)
+        if len(pixel_values.shape) == 5:
+            n_views = pixel_values.size(1)
+            image_views = torch.split(pixel_values, split_size_or_sections=1, dim=1)
+            pixel_values = torch.cat(list(image_views), dim=0).squeeze()
+
+            input_ids = input_ids.repeat(n_views, 1)
+            attention_mask = attention_mask.repeat(n_views, 1)
+
+        outputs = self.model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            pixel_values=pixel_values,
+        )
+
+        if return_loss:
+            loss = clip_loss(outputs.logits_per_text)
+            outputs.loss = loss
+
+        return outputs
 
     def validation_step(self, batch, batch_idx):
         loss, acc = self._shared_eval_step(batch, batch_idx)

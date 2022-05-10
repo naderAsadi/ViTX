@@ -121,8 +121,8 @@ class VisualTransformer(nn.Module):
         for param in self.parameters():
             param.requires_grad = False
 
-    def forward(self, x: torch.Tensor):
-        x = self.conv1(x)  # shape = [*, embed_dim, grid, grid]
+    def forward(self, pixel_values: torch.Tensor):
+        x = self.conv1(pixel_values)  # shape = [*, embed_dim, grid, grid]
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, embed_dim, grid ** 2]
         x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, embed_dim]
         x = torch.cat(
