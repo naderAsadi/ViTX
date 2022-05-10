@@ -76,30 +76,6 @@ class CLIP(BaseMethod):
 
         return images, text_inputs.input_ids, text_inputs.attention_mask
 
-    def training_step(self, batch, batch_idx):
-        pixel_values, text_input_ids, text_attention_mask = batch
-        metrics = {}
-
-        outputs = self.forward(
-            pixel_values=pixel_values,
-            input_ids=text_input_ids,
-            attention_mask=text_attention_mask,
-            return_loss=True,
-        )
-
-        metrics["train/loss"] = outputs.loss
-
-        if self.log_train_acc:
-            retrieval_map = get_retrieval_map(
-                logits_per_text=outputs.logits_per_text, topk=self.topk
-            )
-            acc = retrieval_map.acc_per_text
-            metrics["train/acc"] = acc
-
-        self.log_dict(metrics, sync_dist=True)
-
-        return outputs.loss
-
     def forward(
         self,
         pixel_values: torch.FloatTensor,
@@ -130,6 +106,30 @@ class CLIP(BaseMethod):
             outputs.loss = loss
 
         return outputs
+
+    def training_step(self, batch, batch_idx):
+        pixel_values, text_input_ids, text_attention_mask = batch
+        metrics = {}
+
+        outputs = self.forward(
+            pixel_values=pixel_values,
+            input_ids=text_input_ids,
+            attention_mask=text_attention_mask,
+            return_loss=True,
+        )
+
+        metrics["train/loss"] = outputs.loss
+
+        if self.log_train_acc:
+            retrieval_map = get_retrieval_map(
+                logits_per_text=outputs.logits_per_text, topk=self.topk
+            )
+            acc = retrieval_map.acc_per_text
+            metrics["train/acc"] = acc
+
+        self.log_dict(metrics, sync_dist=True)
+
+        return outputs.loss
 
     def validation_step(self, batch, batch_idx):
         loss, acc = self._shared_eval_step(batch, batch_idx)
