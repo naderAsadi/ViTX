@@ -19,7 +19,7 @@ class DataConfig:
     val_images_path: str = "../datasets/coco-caption/images/val/"
     train_ann_path: str = "../datasets/coco-caption/annotations/captions_train2014.json"
     val_ann_path: str = "../datasets/coco-caption/annotations/captions_val2014.json"
-    n_workers: int = 8
+    n_workers: int = 10
     n_frames: int = 8
     transform: TransformConfig = TransformConfig()
 
