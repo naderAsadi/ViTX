@@ -29,7 +29,7 @@ def main():
         monitor="epoch",
         mode="max",
         dirpath=config.model.checkpoint_root,
-        filename=f"{config.method}-{config.model.vision_model.name}-{config.data.dataset}-"
+        filename=f"{config.method}-{config.data.dataset}-{config.model.vision_model.name}-"
         + "{epoch:02d}",
     )
 
@@ -48,7 +48,7 @@ def main():
     )
 
     trainer.save_checkpoint(
-        filepath=f"{config.model.checkpoint_root}/{config.method}-{config.model.vision_model.name}-{config.data.dataset}.pt"
+        filepath=f"{config.model.checkpoint_root}/{config.method}-{config.data.dataset}-{config.model.vision_model.name}.pt"
     )
 
 
