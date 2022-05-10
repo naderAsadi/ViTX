@@ -35,15 +35,6 @@ class BaseMethod(pl.LightningModule):
     def configure_optimizers(self):
         return get_optimizer(self.model.parameters(), optim_config=self.optim_config)
 
-    def forward(
-        self,
-        pixel_values: torch.FloatTensor,
-        input_ids: torch.FloatTensor,
-        attention_mask: torch.FloatTensor,
-        return_loss: Optional[bool] = True,
-    ):
-        raise NotImplementedError
-
     def training_step(self, batch, batch_idx):
 
         raise NotImplementedError
