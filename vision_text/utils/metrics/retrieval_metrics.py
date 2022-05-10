@@ -79,7 +79,7 @@ def get_retrieval_map(
         ) / labels_per_text.size(0)
 
     if logits_per_image is not None:
-        # get softmax per text
+        # get softmax per image
         logits_per_image = logits_per_image.softmax(dim=-1)
         # get topk predictions and their indices
         (
