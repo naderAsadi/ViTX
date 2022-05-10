@@ -6,8 +6,9 @@ import torch.nn as nn
 from . import register_method
 from .base import BaseMethod
 from ..config import Config, OptimizerConfig
-from ..losses import SupConLoss
+from ..losses import supcon_loss
 from ..models import MLP, ModelOutput, get_model
+from ..utils import get_optimizer
 
 
 @register_method("simclr")
@@ -15,22 +16,38 @@ class SimCLR(BaseMethod):
     def __init__(
         self,
         model: nn.Module,
+        projection_head: nn.Module,
+        temperature: Optional[float] = 0.3,
         optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
     ):
         super(SimCLR, self).__init__(
             model=model,
             optim_config=optim_config,
         )
-
-        self.loss_func = SupConLoss(temperature=0.5)
+        self.projection_head = projection_head
+        self.temperature = temperature
 
     @classmethod
     def from_config(cls, config: Config) -> "SimCLR":
         model = get_model(model_config=config.model.vision_model)
+        projection_head = MLP(
+            input_dim=config.model.vision_model.embed_dim,
+            hidden_dim=config.model.vision_model.embed_dim,
+            output_dim=config.model.projection_dim,
+            n_layers=2,
+        )
 
         return cls(
             model=model,
+            projection_head=projection_head,
+            temperature=config.model.temperature,
             optim_config=config.model.optimizer,
+        )
+
+    def configure_optimizers(self):
+        return get_optimizer(
+            list(self.model.parameters()) + list(self.projection_head.parameters()),
+            optim_config=self.optim_config,
         )
 
     def forward(
@@ -43,17 +60,18 @@ class SimCLR(BaseMethod):
         ), "`pixel_values` needs to be [bsz, n_views, ...], at least 5 dimensions are required."
 
         bsz = pixel_values.size(0)
-        images = pixel_values.reshape(-1, *pixel_values.shape[2:])
+        image_views = torch.split(pixel_values, split_size_or_sections=1, dim=1)
+        pixel_values = torch.cat(list(image_views), dim=0).squeeze()
 
-        outputs = self.model(images)
-        features = outputs.pooler_output
+        outputs = self.model(pixel_values)
+        features = self.projection_head(outputs.pooler_output)
 
         features = nn.functional.normalize(features, dim=-1)
         f1, f2 = torch.split(features, [bsz, bsz], dim=0)
         features = torch.cat([f1.unsqueeze(1), f2.unsqueeze(1)], dim=1)
 
         if return_loss:
-            loss = self.loss_func(features=features)
+            loss = supcon_loss(features=features, temperature=self.temperature)
             outputs.loss = loss
 
         return outputs
