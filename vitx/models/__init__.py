@@ -82,7 +82,7 @@ def get_model(model_config: Union[VisionModelConfig, TextModelConfig], **kwargs)
 
 
 # automatically import any Python files in the models/ directory
-import_all_modules(FILE_ROOT, "vision_text.models")
+import_all_modules(FILE_ROOT, "vitx.models")
 
 
 from .mlp import LinearClassifier, MLP

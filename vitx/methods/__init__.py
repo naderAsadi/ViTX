@@ -60,6 +60,6 @@ def get_method(config: Config) -> BaseMethod:
 
 
 # automatically import any Python files in the methods/ directory
-import_all_modules(FILE_ROOT, "vision_text.methods")
+import_all_modules(FILE_ROOT, "vitx.methods")
 
 from .clip import CLIP

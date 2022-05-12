@@ -53,7 +53,7 @@ def get_dataset(data_config: DataConfig, split: str = "train"):
 
 
 # automatically import any Python files in the data/ directory
-import_all_modules(FILE_ROOT, "vision_text.data")
+import_all_modules(FILE_ROOT, "vitx.data")
 
 from .image_text import ImageTextDataset
 from .coco import COCODataset

@@ -7,7 +7,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.strategies import DDPStrategy
 
-from vision_text import (
+from vitx import (
     config_parser,
     get_dataloaders,
     get_loggers,
