@@ -7,7 +7,6 @@ import torch
 @dataclass
 class ModelOutput:
     loss: Optional[torch.FloatTensor] = None
-    pooled_last_hidden: torch.FloatTensor = None
     last_hidden_state: torch.FloatTensor = None
     pooler_output: torch.FloatTensor = None
 

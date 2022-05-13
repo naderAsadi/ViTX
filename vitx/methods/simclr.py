@@ -63,7 +63,7 @@ class SimCLR(BaseMethod):
         image_views = torch.split(pixel_values, split_size_or_sections=1, dim=1)
         pixel_values = torch.cat(list(image_views), dim=0).squeeze()
 
-        outputs = self.model(pixel_values=pixel_values)
+        outputs = self.model(pixel_values=pixel_values, forward_head=False)
         features = self.projection_head(outputs.pooler_output)
 
         features = nn.functional.normalize(features, dim=-1)

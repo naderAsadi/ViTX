@@ -121,7 +121,9 @@ class VisualTransformer(nn.Module):
         for param in self.parameters():
             param.requires_grad = False
 
-    def forward(self, pixel_values: torch.Tensor):
+    def forward(
+        self, pixel_values: torch.Tensor, forward_head: Optional[bool] = True, *args
+    ):
         x = self.conv1(pixel_values)  # shape = [*, embed_dim, grid, grid]
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, embed_dim, grid ** 2]
         x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, embed_dim]
@@ -144,7 +146,7 @@ class VisualTransformer(nn.Module):
 
         cls_embeds = self.ln_post(x[:, 0, :])
 
-        if self.proj is not None:
+        if forward_head:
             cls_embeds = cls_embeds @ self.proj
 
         return ModelOutput(pooler_output=cls_embeds, last_hidden_state=x)

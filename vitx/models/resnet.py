@@ -1,5 +1,6 @@
 import os
 import requests
+from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -287,12 +288,16 @@ class ResNet(nn.Module):
 
         return pooled_x, x
 
-    def forward(self, pixel_values, *args):
+    def forward(
+        self, pixel_values: torch.Tensor, forward_head: Optional[bool] = True, *args
+    ):
         pooled_model_embeds, model_embeds = self.return_hidden(pixel_values)
-        logits = self.fc(pooled_model_embeds)
+
+        logits = pooled_model_embeds
+        if forward_head:
+            logits = self.fc(pooled_model_embeds)
 
         return ModelOutput(
-            pooled_last_hidden=pooled_model_embeds,
             last_hidden_state=model_embeds,
             pooler_output=logits,
         )
