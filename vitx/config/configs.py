@@ -75,6 +75,7 @@ class TrainConfig:
     # Distributed Training
     accelerator_type: str = "gpu"
     n_devices: int = -1
+    mixed_precision: bool = False
 
 
 @dataclass

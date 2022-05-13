@@ -35,7 +35,7 @@ def main():
         config_path="./configs/", config_name="default", job_name="test"
     )
 
-    sync_checkpoints(config=config)
+    ckpt_checkpoint = sync_checkpoints(config=config)
 
     train_loader, test_loader = get_dataloaders(
         config=config, return_val_loader=config.train.check_val
@@ -57,13 +57,17 @@ def main():
         accelerator=config.train.accelerator_type,
         devices=config.train.n_devices,
         strategy=DDPStrategy(),
+        precision=16 if config.train.mixed_precision else 32,
         max_epochs=config.train.n_epochs,
         check_val_every_n_epoch=config.train.check_val_every_n_epoch,
         callbacks=[checkpoint_callback],
     )
 
     trainer.fit(
-        model=method, train_dataloaders=train_loader, val_dataloaders=test_loader
+        model=method,
+        train_dataloaders=train_loader,
+        val_dataloaders=test_loader,
+        ckpt_path=ckpt_checkpoint,
     )
 
     trainer.save_checkpoint(
