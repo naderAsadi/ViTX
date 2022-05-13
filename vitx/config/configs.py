@@ -61,7 +61,7 @@ class ModelConfig:
     optimizer: OptimizerConfig = OptimizerConfig()
     projection_dim: int = 256
     logit_scale_init_value: float = 2.6592
-    temperature: float = 0.3
+    temperature: float = 0.1
     topk: int = 1
     checkpoint_root: str = "checkpoints/"
 
