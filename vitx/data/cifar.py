@@ -67,6 +67,19 @@ class CIFARDataset(Dataset):
             download=True,
         )
 
+    def __getitem__(self, index: int):
+        assert index >= 0 and index < len(
+            self.dataset
+        ), f"Provided index ({index}) is outside of dataset range."
+        sample = self.dataset[index]
+        data, targets = sample
+        if self.image_transform is not None:
+            data = self.image_transform(data)
+        return data, targets
+
+    def __len__(self):
+        return len(self.dataset)
+
 
 @register_dataset("cifar10")
 class CIFAR10Dataset(CIFARDataset):

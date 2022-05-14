@@ -1,20 +1,12 @@
-import os
-import hashlib
-from pathlib import Path
-from omegaconf import OmegaConf
-
+import torch
+from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.strategies import DDPStrategy
 
-from vitx import (
-    config_parser,
-    get_dataloaders,
-    get_loggers,
-    get_method,
-    get_model,
-    sync_checkpoints,
-)
+from vitx import config_parser, get_model, sync_checkpoints
+from vitx.data import CIFAR100Dataset, get_image_transforms
+from vitx.methods.evaluators import ProbeEvaluator
 
 
 def main():
@@ -22,41 +14,53 @@ def main():
         config_path="./configs/", config_name="default", job_name="test"
     )
 
-    train_loader, test_loader = get_dataloaders(
-        config=config, return_val_loader=config.train.check_val
-    )
-    method = get_method(config=config)
-    loggers = get_loggers(config=config)
+    ckpt_checkpoint_path = sync_checkpoints(config=config)
 
-    checkpoint_callback = ModelCheckpoint(
-        save_top_k=1,
-        monitor="epoch",
-        mode="max",
-        dirpath=config.model.checkpoint_root,
-        filename=f"{config.method}-{config.data.dataset}-{config.model.vision_model.name}-"
-        + "{epoch:02d}",
+    image_transform = get_image_transforms(transform_config=config.data.transform)
+    train_dataset = CIFAR100Dataset(
+        images_path="../datasets/cl-datasets/data/",
+        image_transform=image_transform,
+        train=True,
+    )
+    test_dataset = CIFAR100Dataset(
+        images_path="../datasets/cl-datasets/data/",
+        image_transform=image_transform,
+        train=False,
+    )
+    train_loader = DataLoader(
+        dataset=train_dataset,
+        batch_size=config.train.batch_size,
+        num_workers=config.data.n_workers,
+        shuffle=True,
+    )
+    test_loader = DataLoader(
+        dataset=test_dataset,
+        batch_size=config.train.batch_size,
+        num_workers=config.data.n_workers,
+        shuffle=False,
+    )
+
+    checkpoint = torch.load(config.model.ckpt_checkpoint_path)
+    model = get_model(model_config=config.model.vision_model)
+    model.load_state_dict(checkpoint["state_dict"])
+
+    probe_evaluator = ProbeEvaluator(
+        model=model, embed_dim=config.model.vision_model.embed_dim, n_classes=100
     )
 
     trainer = pl.Trainer(
-        logger=loggers,
         accelerator=config.train.accelerator_type,
         devices=config.train.n_devices,
         strategy=DDPStrategy(),
         precision=16 if config.train.mixed_precision else 32,
         max_epochs=config.train.n_epochs,
         check_val_every_n_epoch=config.train.check_val_every_n_epoch,
-        callbacks=[checkpoint_callback],
     )
 
     trainer.fit(
         model=method,
         train_dataloaders=train_loader,
         val_dataloaders=test_loader,
-        ckpt_path=ckpt_checkpoint,
-    )
-
-    trainer.save_checkpoint(
-        filepath=f"{config.model.checkpoint_root}/{config.method}-{config.data.dataset}-{config.model.vision_model.name}.pt"
     )
 
 
