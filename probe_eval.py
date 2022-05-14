@@ -1,3 +1,8 @@
+import os
+import hashlib
+from pathlib import Path
+from omegaconf import OmegaConf
+
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.strategies import DDPStrategy
@@ -16,8 +21,6 @@ def main():
     config = config_parser(
         config_path="./configs/", config_name="default", job_name="test"
     )
-
-    ckpt_checkpoint_path = sync_checkpoints(config=config)
 
     train_loader, test_loader = get_dataloaders(
         config=config, return_val_loader=config.train.check_val
@@ -49,7 +52,7 @@ def main():
         model=method,
         train_dataloaders=train_loader,
         val_dataloaders=test_loader,
-        ckpt_path=config.model.ckpt_checkpoint_path,
+        ckpt_path=ckpt_checkpoint,
     )
 
     trainer.save_checkpoint(

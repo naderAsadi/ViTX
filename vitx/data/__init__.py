@@ -58,5 +58,5 @@ import_all_modules(FILE_ROOT, "vitx.data")
 from .image_text import ImageTextDataset
 from .coco import COCODataset
 from .mpi import MPIVideoDataset
-
+from .cifar import CIFAR10, CIFAR100
 from .helper import get_dataloaders

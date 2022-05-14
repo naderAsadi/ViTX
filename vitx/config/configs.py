@@ -64,6 +64,7 @@ class ModelConfig:
     temperature: float = 0.1
     topk: int = 1
     checkpoint_root: str = "checkpoints/"
+    ckpt_checkpoint_path: Optional[str] = None
 
 
 @dataclass
