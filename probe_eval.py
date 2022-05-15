@@ -4,7 +4,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.strategies import DDPStrategy
 
-from vitx import config_parser, get_model, sync_checkpoints
+from vitx import config_parser, get_method, sync_checkpoints
 from vitx.data import CIFAR100Dataset, get_image_transforms
 from vitx.methods.evaluators import ProbeEvaluator
 
@@ -41,11 +41,11 @@ def main():
     )
 
     checkpoint = torch.load(config.model.ckpt_checkpoint_path)
-    model = get_model(model_config=config.model.vision_model)
-    model.load_state_dict(checkpoint["state_dict"])
+    method = get_method(config=config)
+    method.load_state_dict(checkpoint["state_dict"])
 
     probe_evaluator = ProbeEvaluator(
-        model=model, embed_dim=config.model.vision_model.embed_dim, n_classes=100
+        model=method.model, embed_dim=config.model.vision_model.embed_dim, n_classes=100
     )
 
     trainer = pl.Trainer(
@@ -58,7 +58,7 @@ def main():
     )
 
     trainer.fit(
-        model=method,
+        model=probe_evaluator,
         train_dataloaders=train_loader,
         val_dataloaders=test_loader,
     )
