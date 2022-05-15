@@ -9,9 +9,7 @@ from ...models import VisionTextEncoder
 
 
 class ProbeEvaluator(pl.LightningModule):
-    def __init__(
-        self, model: nn.Module, embed_dim: int, n_classes: int
-    ):
+    def __init__(self, model: nn.Module, embed_dim: int, n_classes: int):
         """Linear probe evaluation class.
 
         Args:

@@ -1,8 +1,11 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 from omegaconf import OmegaConf
 from rich.console import Console
 
 from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.callbacks import RichProgressBar
+from pytorch_lightning.callbacks.progress.rich_progress import RichProgressBarTheme
+
 from transformers.utils import logging
 
 from ..config import Config
@@ -34,3 +37,15 @@ def spinner_animation(message: str, spinner_type: Optional[str] = "dots"):
         return wrapper
 
     return decorator
+
+
+class ProgressBar(RichProgressBar):
+    def __init__(
+        self,
+        refresh_rate: int = 1,
+        leave: bool = False,
+        theme: RichProgressBarTheme = RichProgressBarTheme(),
+        console_kwargs: Optional[Dict[str, Any]] = None,
+    ) -> None:
+
+        super().__init__(refresh_rate, leave, theme, console_kwargs)
