@@ -27,12 +27,15 @@ class DataConfig:
 @dataclass
 class OptimizerConfig:
     name: str = "SGD"
-    lr: float = 5e-3
+    lr: float = 1e-2
     momentum: float = 0.9
     weight_decay: float = 1e-4
     beta1: float = 0.9
     beta2: float = 0.999
     eps: float = 1e-8
+    # scheduler
+    scheduler_milestones: str = "100-150"
+    scheduler_gamma: float = 0.1
 
 
 @dataclass
@@ -69,13 +72,14 @@ class ModelConfig:
 
 @dataclass
 class TrainConfig:
-    batch_size: int = 64
-    n_epochs: int = 100
+    batch_size: int = 128
+    n_epochs: int = 200
     check_val: bool = True
     check_val_every_n_epoch: int = 5
     # Distributed Training
     accelerator_type: str = "gpu"
     n_devices: int = -1
+    device_ids: Optional[str] = None
     mixed_precision: bool = False
 
 

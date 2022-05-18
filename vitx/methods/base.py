@@ -33,7 +33,23 @@ class BaseMethod(pl.LightningModule):
         raise NotImplementedError
 
     def configure_optimizers(self):
-        return get_optimizer(self.model.parameters(), optim_config=self.optim_config)
+        optimizer = get_optimizer(
+            self.model.parameters(), optim_config=self.optim_config
+        )
+
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(
+            optimizer=optimizer,
+            milestones=list(
+                map(int, self.optim_config.scheduler_milestones.split("-"))
+            ),
+            gamma=self.optim_config.scheduler_gamma,
+        )
+
+        return {"optimizer": optimizer, "lr_scheduler": scheduler}
+
+    def training_epoch_end(self, outputs):
+        scheduler = self.lr_schedulers()
+        scheduler.step()
 
     def training_step(self, batch, batch_idx):
 

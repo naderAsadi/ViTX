@@ -34,10 +34,14 @@ def main():
         + "{epoch:02d}",
     )
 
+    devices = config.train.n_devices
+    if config.train.device_ids is not None:
+        devices = list(map(int, config.train.device_ids.split("-")))
+
     trainer = pl.Trainer(
         logger=loggers,
         accelerator=config.train.accelerator_type,
-        devices=config.train.n_devices,
+        devices=devices,
         strategy=DDPStrategy(),
         precision=16 if config.train.mixed_precision else 32,
         max_epochs=config.train.n_epochs,
