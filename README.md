@@ -20,9 +20,9 @@ python main.py data=coco model/vision_model=vit-b  model/text_model=vit-b
 ## Reading The Commits
 Here is a reference to what each emoji in the commits means:
 
-* 📎 : Some basic updates. (paperclip)
-* ♻️ : Refactoring. (recycle)
-* 💩 : Bad code, needs to be revised! (poop)
-* 🐛 : Bug fix. (bug)
-* 💡 : New feature. (bulb)
-* ⚡ : Performance Improvement. (zap)
+* 📎 : Some basic updates.
+* ♻️ : Refactoring.
+* 💩 : Bad code, needs to be revised!
+* 🐛 : Bug fix.
+* 💡 : New feature.
+* ⚡ : Performance Improvement.
