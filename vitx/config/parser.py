@@ -31,6 +31,6 @@ def config_parser(config_path: str, config_name: str, job_name: str) -> DictConf
     hydra.initialize_config_dir(
         config_dir=os.path.abspath(config_path), job_name=job_name
     )
-    print(overrides)
+    
     cfg = hydra.compose(config_name=config_name, overrides=overrides)
     return cfg
