@@ -127,21 +127,21 @@ class CLIP(BaseMethod):
             acc = retrieval_map.acc_per_text
             metrics["train/acc"] = acc
 
-        self.log_dict(metrics, sync_dist=True)
+        self.log_dict(metrics, sync_dist=True, prog_bar=True)
 
         return outputs.loss
 
     def validation_step(self, batch, batch_idx):
         loss, acc = self._shared_eval_step(batch, batch_idx)
         metrics = {"validation/loss": loss, "validation/acc": acc}
-        self.log_dict(metrics, sync_dist=True)
+        self.log_dict(metrics, sync_dist=True, prog_bar=True)
 
         return metrics
 
     def test_step(self, batch, batch_idx):
         loss, acc = self._shared_eval_step(batch, batch_idx)
         metrics = {"test/loss": loss, "test/acc": acc}
-        self.log_dict(metrics, sync_dist=True)
+        self.log_dict(metrics, sync_dist=True, prog_bar=True)
 
         return metrics
 

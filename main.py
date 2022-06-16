@@ -29,7 +29,7 @@ def main():
         save_top_k=1,
         monitor="epoch",
         mode="max",
-        dirpath=config.model.checkpoint_root,
+        dirpath=config.checkpoints_root,
         filename=f"{config.method}-{config.data.dataset}-{config.model.vision_model.name}-"
         + "{epoch:02d}",
     )
@@ -42,7 +42,7 @@ def main():
         logger=loggers,
         accelerator=config.train.accelerator_type,
         devices=devices,
-        strategy=DDPStrategy(),
+        strategy=DDPStrategy(find_unused_parameters=False),
         precision=16 if config.train.mixed_precision else 32,
         max_epochs=config.train.n_epochs,
         check_val_every_n_epoch=config.train.check_val_every_n_epoch,
@@ -53,11 +53,11 @@ def main():
         model=method,
         train_dataloaders=train_loader,
         val_dataloaders=test_loader,
-        ckpt_path=config.model.ckpt_checkpoint_path,
+        ckpt_path=config.ckpt_checkpoint_path,
     )
 
     trainer.save_checkpoint(
-        filepath=f"{config.model.checkpoint_root}/{config.method}-{config.data.dataset}-{config.model.vision_model.name}.pt"
+        filepath=f"{config.checkpoints_root}/{config.method}-{config.data.dataset}-{config.model.vision_model.name}.pt"
     )
 
 

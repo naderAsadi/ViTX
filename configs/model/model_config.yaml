@@ -6,4 +6,3 @@ defaults:
 
 projection_dim: 256
 logit_scale_init_value: 2.6592
-checkpoint_root: "checkpoints/"

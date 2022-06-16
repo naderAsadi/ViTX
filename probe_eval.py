@@ -40,7 +40,7 @@ def main():
         shuffle=False,
     )
 
-    checkpoint = torch.load(config.model.ckpt_checkpoint_path)
+    checkpoint = torch.load(config.ckpt_checkpoint_path)
     method = get_method(config=config)
     method.load_state_dict(checkpoint["state_dict"])
 

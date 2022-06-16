@@ -86,21 +86,21 @@ class SimCLR(BaseMethod):
         )
 
         metrics["train/loss"] = outputs.loss
-        self.log_dict(metrics, sync_dist=True)
+        self.log_dict(metrics, sync_dist=True, prog_bar=True)
 
         return outputs.loss
 
     def validation_step(self, batch, batch_idx):
         loss = self._shared_eval_step(batch, batch_idx)
         metrics = {"validation/loss": loss}
-        self.log_dict(metrics, sync_dist=True)
+        self.log_dict(metrics, sync_dist=True, prog_bar=True)
 
         return metrics
 
     def test_step(self, batch, batch_idx):
         loss = self._shared_eval_step(batch, batch_idx)
         metrics = {"test/loss": loss}
-        self.log_dict(metrics, sync_dist=True)
+        self.log_dict(metrics, sync_dist=True, prog_bar=True)
 
         return metrics
 

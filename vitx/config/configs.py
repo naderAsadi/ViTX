@@ -66,8 +66,6 @@ class ModelConfig:
     logit_scale_init_value: float = 2.6592
     temperature: float = 0.1
     topk: int = 1
-    checkpoint_root: str = "checkpoints/"
-    ckpt_checkpoint_path: Optional[str] = None
 
 
 @dataclass
@@ -93,8 +91,11 @@ class LoggerConfig:
 
 @dataclass
 class Config:
-    method: str = "clip"
     data: DataConfig = DataConfig()
     model: ModelConfig = ModelConfig()
     train: TrainConfig = TrainConfig()
     logger: LoggerConfig = LoggerConfig()
+    method: str = "clip"
+    checkpoints_root: str = "checkpoints/"
+    unique_run_id: Optional[str] = None
+    ckpt_checkpoint_path: Optional[str] = None
