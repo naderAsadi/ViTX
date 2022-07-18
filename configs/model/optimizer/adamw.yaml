@@ -1,5 +1,9 @@
+defaults:
+  - _self_
+  - scheduler: "multi_step_lr"
+
 name: "AdamW"
-lr: 1e-5
+lr: 1e-3
 beta1: 0.9
 beta2: 0.999
 weight_decay: 0.01

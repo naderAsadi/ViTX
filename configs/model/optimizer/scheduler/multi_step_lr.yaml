@@ -1,0 +1,5 @@
+name: "MultiStepLR"
+milestones: "30-50-70"
+gamma: 0.1
+last_epoch: -1
+verbose: True

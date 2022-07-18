@@ -11,10 +11,10 @@ from rich.console import Console
 
 import torch
 
-from ..config import Config, OptimizerConfig
+from ..config import Config, OptimizerConfig, SchedulerConfig
 
 
-def get_optimizer(parameters, optim_config: OptimizerConfig):
+def get_optimizer(parameters, optim_config: OptimizerConfig) -> torch.optim:
 
     assert hasattr(
         torch.optim, optim_config.name
@@ -32,15 +32,46 @@ def get_optimizer(parameters, optim_config: OptimizerConfig):
     return optim(parameters, **optim_config)
 
 
+def get_lr_scheduler(
+    optimizer, scheduler_config: SchedulerConfig
+) -> torch.optim.lr_scheduler:
+
+    assert hasattr(
+        torch.optim.lr_scheduler, scheduler_config.name
+    ), f"{scheduler_config.name} is not a registered scheduler in `torch.optim.lr_scheduler`."
+
+    scheduler = getattr(torch.optim.lr_scheduler, scheduler_config.name)
+    scheduler_args = inspect.getfullargspec(scheduler).args
+
+    scheduler_config = dict(scheduler_config)
+
+    scheduler_config["milestones"] = list(
+        map(int, scheduler_config["milestones"].split("-"))
+    )
+
+    keys = list(scheduler_config.keys())
+    for key in keys:
+        if key not in scheduler_args:
+            scheduler_config.pop(key)
+
+    return scheduler(optimizer, **scheduler_config)
+
+
 def _get_unique_id_from_config(config: Config) -> str:
     config_dict = dict(config)
 
     config_dict["data"] = {"dataset": config.data.dataset}
     # attributes to discard for the unique hash address
-    r_keys = ["train", "logger", "checkpoints_root", "unique_run_id", "ckpt_checkpoint_path"]
+    r_keys = [
+        "train",
+        "logger",
+        "checkpoints_root",
+        "unique_run_id",
+        "ckpt_checkpoint_path",
+    ]
     for key in r_keys:
         config_dict.pop(key)
-        
+
     return hashlib.md5(str(config_dict).encode()).hexdigest()[:8]
 
 
@@ -54,7 +85,9 @@ def sync_checkpoints(config: Config):
         checkpoint_id = _get_unique_id_from_config(config=config)
         config.unique_run_id = checkpoint_id
 
-    checkpoints_root = Path(config.checkpoints_root).joinpath(config.unique_run_id).absolute()
+    checkpoints_root = (
+        Path(config.checkpoints_root).joinpath(config.unique_run_id).absolute()
+    )
 
     # if no checkpoint is available, create checkpoint dir and save run configs
     if not os.path.exists(checkpoints_root):

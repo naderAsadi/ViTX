@@ -1,4 +1,8 @@
+defaults:
+  - _self_
+  - scheduler: "multi_step_lr"
+
 name: "SGD"
-lr: 1e-3
+lr: 0.1
 momentum: 0.9
 weight_decay: 0.0001

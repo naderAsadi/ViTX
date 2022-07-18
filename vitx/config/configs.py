@@ -1,3 +1,4 @@
+import dataclasses
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
@@ -25,17 +26,24 @@ class DataConfig:
 
 
 @dataclass
+class SchedulerConfig:
+    name: str = "MultiStepLR"
+    milestones: str = "30-50-70"
+    gamma: float = 0.1
+    last_epoch: int = -1
+    verbose: bool = True
+
+
+@dataclass
 class OptimizerConfig:
     name: str = "SGD"
-    lr: float = 1e-2
+    lr: float = 0.1
     momentum: float = 0.9
     weight_decay: float = 1e-4
     beta1: float = 0.9
     beta2: float = 0.999
     eps: float = 1e-8
-    # scheduler
-    scheduler_milestones: str = "100-150"
-    scheduler_gamma: float = 0.1
+    scheduler: SchedulerConfig = SchedulerConfig()
 
 
 @dataclass
@@ -62,7 +70,7 @@ class ModelConfig:
     vision_model: VisionModelConfig = VisionModelConfig()
     text_model: TextModelConfig = TextModelConfig()
     optimizer: OptimizerConfig = OptimizerConfig()
-    projection_dim: int = 256
+    projection_dim: int = 128
     logit_scale_init_value: float = 2.6592
     temperature: float = 0.1
     topk: int = 1
@@ -86,7 +94,7 @@ class LoggerConfig:
     log_train_acc: bool = False
     wandb: bool = False
     wandb_offline: bool = False
-    wandb_project: str = "vision-text"
+    wandb_project: str = "ViTX"
 
 
 @dataclass

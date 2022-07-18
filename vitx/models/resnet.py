@@ -167,12 +167,12 @@ class ResNet(nn.Module):
         self,
         block,
         layers,
-        output_dim=1000,
         zero_init_residual=False,
         groups=1,
         width_per_group=64,
         replace_stride_with_dilation=None,
         norm_layer=None,
+        **kwargs,
     ):
         super(ResNet, self).__init__()
         if norm_layer is None:
@@ -212,7 +212,6 @@ class ResNet(nn.Module):
             block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2]
         )
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(512 * block.expansion, output_dim)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -288,18 +287,11 @@ class ResNet(nn.Module):
 
         return pooled_x, x
 
-    def forward(
-        self, pixel_values: torch.Tensor, forward_head: Optional[bool] = True, *args
-    ):
+    def forward(self, pixel_values: torch.Tensor, *args):
         pooled_model_embeds, model_embeds = self.return_hidden(pixel_values)
 
-        logits = pooled_model_embeds
-        if forward_head:
-            logits = self.fc(pooled_model_embeds)
-
         return ModelOutput(
-            last_hidden_state=model_embeds,
-            pooler_output=logits,
+            last_hidden_state=model_embeds, pooler_output=pooled_model_embeds,
         )
 
 
