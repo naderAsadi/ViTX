@@ -104,6 +104,6 @@ class Config:
     train: TrainConfig = TrainConfig()
     logger: LoggerConfig = LoggerConfig()
     method: str = "clip"
-    checkpoints_root: str = "checkpoints/"
+    checkpoints_root: str = "./checkpoints/"
     unique_run_id: Optional[str] = None
     ckpt_checkpoint_path: Optional[str] = None
