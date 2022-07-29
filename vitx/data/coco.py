@@ -5,7 +5,7 @@ from PIL import Image
 from typing import Any, Callable, Optional, Tuple
 
 import torch
-from torchvision import transforms as T
+import torchvision
 import torchvision.datasets as datasets
 
 from . import register_dataset
@@ -19,38 +19,23 @@ class COCODataset(datasets.CocoCaptions):
         self,
         images_path: str,
         ann_file_path: str,
-        image_transform=None,
-        image_size: Optional[int] = 224,
-        resize_ratio: Optional[float] = 0.75,
-        n_views: Optional[int] = 1,
+        image_transform: torchvision.transforms.Compose,
     ):
-        """COCO Caption dataset.
+        """_summary_
 
         Args:
-            images_path (str): Folder containing images from COCO Caption dataset.
-            ann_file_path (str): Path to the COCO Caption annotation file.
-            image_transform (_type_, optional): _description_. Defaults to None.
-            image_size (Optional[int], optional): The size of outputted images.. Defaults to 224.
-            resize_ratio (Optional[float], optional): Minimum percentage of image contained by resize. Defaults to 0.75.
+            images_path (str): _description_
+            ann_file_path (str): _description_
+            image_transform (torchvision.transforms.Compose): _description_
         """
-
-        if image_transform is None:
-            image_transform = T.Compose(
-                [
-                    T.Resize((image_size, image_size)),
-                    T.ToTensor(),
-                    T.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
-                ]
-            )
 
         super(COCODataset, self).__init__(
             root=images_path, annFile=ann_file_path, transform=image_transform
         )
-        self.n_views = n_views
 
     @classmethod
     def from_config(
-        cls, data_config: DataConfig, split: str = "train"
+        cls, data_config: DataConfig, split: str = "train", no_transform: bool = False
     ) -> "COCODataset":
 
         assert split in [
@@ -66,17 +51,16 @@ class COCODataset(datasets.CocoCaptions):
             images_path = data_config.val_images_path
             ann_file_path = data_config.val_ann_path
 
-        image_transform = get_image_transforms(
-            transform_config=data_config.transform, split=split
-        )
+        image_transform = None
+        if not no_transform:
+            image_transform = get_image_transforms(
+                transform_config=data_config.transform, split=split
+            )
 
         return cls(
             images_path=images_path,
             ann_file_path=ann_file_path,
             image_transform=image_transform,
-            image_size=data_config.transform.image_size,
-            resize_ratio=data_config.transform.resize_ratio,
-            n_views=data_config.transform.n_views,
         )
 
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
@@ -96,10 +80,8 @@ class COCODataset(datasets.CocoCaptions):
         path = coco.loadImgs(img_id)[0]["file_name"]
 
         image = Image.open(os.path.join(self.root, path)).convert("RGB")
-        image_views = []
 
-        for n in range(self.n_views):
-            img, target = self.transforms(image, target)
-            image_views.append(img)
+        if self.transforms is not None:
+            image, target = self.transforms(image, target)
 
-        return torch.stack(image_views, dim=0).squeeze(), random.choice(target)
+        return image, random.choice(target)

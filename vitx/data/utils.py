@@ -4,20 +4,32 @@ from torch.utils.data import DataLoader
 from torchvision import transforms as T
 
 from . import get_dataset
+from .collate import ImageCollateFunction, MultiViewCollateFunction
 from ..config import Config, TransformConfig
 from ..utils import spinner_animation
 
 
 @spinner_animation(message="Loading Datasets...")
-def get_dataloaders(config: Config, return_val_loader: bool = True):
+def get_dataloaders(config: Config, return_val_loader: Optional[bool] = True):
 
-    train_dataset = get_dataset(data_config=config.data, split="train")
+    train_dataset = get_dataset(
+        data_config=config.data, split="train", no_transform=True
+    )
+
+    train_transform = get_image_transforms(
+        transform_config=config.data.transform, split="train"
+    )
+    if config.data.transform.n_views == 1:
+        train_collate_fn = ImageCollateFunction(transform=train_transform)
+    else:
+        train_collate_fn = MultiViewCollateFunction(transform=train_transform)
 
     train_loader = DataLoader(
         dataset=train_dataset,
         batch_size=config.train.batch_size,
         num_workers=config.data.n_workers,
         shuffle=True,
+        collate_fn=train_collate_fn,
     )
 
     if return_val_loader:
@@ -37,7 +49,7 @@ def get_dataloaders(config: Config, return_val_loader: bool = True):
 
 def get_image_transforms(
     transform_config: TransformConfig, split: Optional[str] = None
-):
+) -> T.Compose:
     """_summary_
 
     Args:
@@ -45,7 +57,7 @@ def get_image_transforms(
         split (Optional[str], optional): _description_. Defaults to None.
 
     Returns:
-        _type_: _description_
+        torchvision.transforms.Compose: _description_
     """
 
     if split in ["val", "test"]:

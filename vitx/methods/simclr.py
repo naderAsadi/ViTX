@@ -55,7 +55,7 @@ class SimCLR(BaseMethod):
     ):
         assert (
             len(pixel_values.shape) == 5
-        ), "`pixel_values` needs to be [bsz, n_views, ...], at least 5 dimensions are required."
+        ), f"`pixel_values` needs to be [bsz, n_views, ...], at least 5 dimensions are required but {len(pixel_values.shape)} was received."
 
         bsz = pixel_values.size(0)
         image_views = torch.split(pixel_values, split_size_or_sections=1, dim=1)

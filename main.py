@@ -19,9 +19,8 @@ def main():
 
     ckpt_checkpoint_path = sync_checkpoints(config=config)
 
-    train_loader, test_loader = get_dataloaders(
-        config=config, return_val_loader=config.train.check_val
-    )
+    val_loader = None
+    train_loader = get_dataloaders(config=config, return_val_loader=False)
     method = get_method(config=config)
     loggers = get_loggers(config=config)
 
@@ -52,7 +51,7 @@ def main():
     trainer.fit(
         model=method,
         train_dataloaders=train_loader,
-        val_dataloaders=test_loader,
+        val_dataloaders=val_loader,
         ckpt_path=config.ckpt_checkpoint_path,
     )
 

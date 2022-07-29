@@ -4,6 +4,13 @@
 
 **ViTX** is a **Vi**sion-**T**e**X**t representation learning framework on top of [PyTorch Lightning](https://www.pytorchlightning.ai/) and HuggingFace [Transformers](https://huggingface.co/) for Cross-Modal Perception research. It is designed to be readable and easily extensible, to allow users to quickly run and experiment with their own ideas.
 
+### Currently Supported Methods
+
+- [CLIP, 2021](https://arxiv.org/abs/2103.00020)
+- [~~SLIP, 2021~~](https://arxiv.org/abs/2112.12750)
+- [~~CyCLIP, 2022~~](https://arxiv.org/abs/2205.14459)
+- [SimCLR, 2020](https://arxiv.org/abs/2002.05709)
+- [~~BYOL, 2020~~](2006.07733)
 
 ## Installation
 
@@ -38,8 +45,17 @@ pip install -e .
 
 ## How To Use
 
+With `vitx` you can use uni-modal and multi-modal self-supervised methods in a modular way using the full power of PyTorch. Experiment with different backbones, models and loss functions. The framework has been designed to be easy to use from the ground up.
+
+### Quick Start
+
+```python
+
+```
+
+
 <details>
-  <summary>Training examples</summary>
+  <summary>More training examples</summary>
   
 Train CLIP with ViT-base on COCO Captions dataset:
 

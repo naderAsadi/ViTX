@@ -4,8 +4,8 @@ from random import randint, choices
 from typing import Any, Optional, Tuple
 
 import torch
+import torchvision
 from torch.utils.data import Dataset
-from torchvision import transforms as T
 
 from . import register_dataset
 from .utils import get_image_transforms
@@ -18,20 +18,16 @@ class ImageTextDataset(Dataset):
         self,
         images_path: str,
         ann_file_path: str,
-        image_transform: Optional = None,
-        image_size: Optional[int] = 224,
-        resize_ratio: Optional[float] = 0.75,
+        image_transform: torchvision.transforms.Compose,
         shuffle: Optional[bool] = False,
-        n_views: Optional[int] = 1,
     ):
         """Create a image-text dataset from a directory with congruent text and image names.
 
         Args:
             images_path (str): Path to the folder containing images of the dataset.
             ann_file_path (str): Path to the `json` or `csv` annotation file.
-            image_transform (_type_, optional): _description_. Defaults to None.
-            image_size (Optional[int], optional): The size of outputted images.. Defaults to 224.
-            resize_ratio (Optional[float], optional): Minimum percentage of image contained by resize. Defaults to 0.75.
+            image_transform (torchvision.transforms.Compose): _description_.
+            shuffle (Optional[bool], optional): _description_.
         """
         super(ImageTextDataset, self).__init__()
 
@@ -58,21 +54,12 @@ class ImageTextDataset(Dataset):
         self.captions = {k: v for k, v in captions.items() if k in keys}
         self.image_files = {k: v for k, v in image_files.items() if k in keys}
 
-        if image_transform is None:
-            image_transform = T.Compose(
-                [
-                    T.Resize((image_size, image_size)),
-                    T.ToTensor(),
-                    T.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
-                ]
-            )
         self.image_transform = image_transform
         self.shuffle = shuffle
-        self.n_views = n_views
 
     @classmethod
     def from_config(
-        cls, data_config: DataConfig, split: str = "train"
+        cls, data_config: DataConfig, split: str = "train", no_transform: bool = False
     ) -> "ImageTextDataset":
 
         assert split in [
@@ -88,17 +75,16 @@ class ImageTextDataset(Dataset):
             images_path = data_config.val_images_path
             ann_file_path = data_config.val_ann_path
 
-        image_transform = get_image_transforms(
-            transform_config=data_config.transform, split=split
-        )
+        image_transform = None
+        if not no_transform:
+            image_transform = get_image_transforms(
+                transform_config=data_config.transform, split=split
+            )
 
         return cls(
             images_path=images_path,
             ann_file_path=ann_file_path,
             image_transform=image_transform,
-            image_size=data_config.transform.image_size,
-            resize_ratio=data_config.transform.resize_ratio,
-            n_views=data_config.transform.n_views,
         )
 
     def __len__(self):
@@ -127,8 +113,7 @@ class ImageTextDataset(Dataset):
         except:
             return self.skip_sample(idx)
 
-        image_views = self.image_transform(image)
-        if self.n_views > 1:
-            image_views = torch.stack([image_views, self.image_transform(image)], dim=0)
+        if self.image_transform is not None:
+            image = self.image_transform(image)
 
-        return image_views, caption
+        return image, caption
