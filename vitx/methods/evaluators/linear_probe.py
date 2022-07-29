@@ -24,7 +24,9 @@ class ProbeEvaluator(pl.LightningModule):
 
     def configure_optimizers(self):
         return torch.optim.AdamW(
-            params=self.linear_probe.parameters(), lr=1e-3, weight_decay=5e-4,
+            params=self.linear_probe.parameters(),
+            lr=1e-3,
+            weight_decay=5e-4,
         )
 
     def forward(
@@ -35,7 +37,10 @@ class ProbeEvaluator(pl.LightningModule):
     ):
         self.model.eval()
         with torch.inference_mode():
-            features = self.model(pixel_values=pixel_values, forward_head=False,)
+            features = self.model(
+                pixel_values=pixel_values,
+                forward_head=False,
+            )
 
         logits = self.linear_probe(features.pooler_output.clone())
 
@@ -77,7 +82,9 @@ class ProbeEvaluator(pl.LightningModule):
         pixel_values, target = batch
 
         logits, loss = self.forward(
-            pixel_values=pixel_values, target=target, return_loss=True,
+            pixel_values=pixel_values,
+            target=target,
+            return_loss=True,
         )
 
         return loss

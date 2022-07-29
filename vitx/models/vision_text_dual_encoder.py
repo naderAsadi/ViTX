@@ -151,10 +151,13 @@ class VisionTextEncoder(torch.nn.Module):
         return_similarity_logits: Optional[bool] = True,
     ):
 
-        vision_outputs = self._forward_vision_model(pixel_values=pixel_values,)
+        vision_outputs = self._forward_vision_model(
+            pixel_values=pixel_values,
+        )
 
         text_outputs = self.text_model(
-            input_ids=input_ids, attention_mask=attention_mask,
+            input_ids=input_ids,
+            attention_mask=attention_mask,
         )
 
         image_embeds = vision_outputs.pooler_output  # pooler_output

@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from torchvision.datasets.cifar import CIFAR10, CIFAR100
 
 from . import register_dataset
-from .helper import get_image_transforms
+from .utils import get_image_transforms
 from ..config import DataConfig
 
 

@@ -291,7 +291,8 @@ class ResNet(nn.Module):
         pooled_model_embeds, model_embeds = self.return_hidden(pixel_values)
 
         return ModelOutput(
-            last_hidden_state=model_embeds, pooler_output=pooled_model_embeds,
+            last_hidden_state=model_embeds,
+            pooler_output=pooled_model_embeds,
         )
 
 

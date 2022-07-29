@@ -59,4 +59,4 @@ from .image_text import ImageTextDataset
 from .coco import COCODataset
 from .mpi import MPIVideoDataset
 from .cifar import CIFAR10Dataset, CIFAR100Dataset
-from .helper import get_dataloaders, get_image_transforms
+from .utils import get_dataloaders, get_image_transforms

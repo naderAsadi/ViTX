@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms as T
 
 from . import register_dataset
-from .helper import get_image_transforms
+from .utils import get_image_transforms
 from ..config import DataConfig
 
 
@@ -127,8 +127,8 @@ class ImageTextDataset(Dataset):
         except:
             return self.skip_sample(idx)
 
-        image_views = []
-        for n in range(self.n_views):
-            image_views.append(self.image_transform(image))
+        image_views = self.image_transform(image)
+        if self.n_views > 1:
+            image_views = torch.stack([image_views, self.image_transform(image)], dim=0)
 
-        return torch.stack(image_views, dim=0).squeeze(), caption
+        return image_views, caption

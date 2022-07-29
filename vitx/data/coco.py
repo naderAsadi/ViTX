@@ -9,7 +9,7 @@ from torchvision import transforms as T
 import torchvision.datasets as datasets
 
 from . import register_dataset
-from .helper import get_image_transforms
+from .utils import get_image_transforms
 from ..config import DataConfig
 
 

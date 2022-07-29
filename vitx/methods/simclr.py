@@ -21,7 +21,8 @@ class SimCLR(BaseMethod):
         optim_config: Optional[Union[OptimizerConfig, dict]] = OptimizerConfig(),
     ):
         super(SimCLR, self).__init__(
-            model=model, optim_config=optim_config,
+            model=model,
+            optim_config=optim_config,
         )
         self.projection_head = projection_head
         self.temperature = temperature
@@ -48,7 +49,9 @@ class SimCLR(BaseMethod):
         )
 
     def forward(
-        self, pixel_values: torch.FloatTensor, return_loss: Optional[bool] = True,
+        self,
+        pixel_values: torch.FloatTensor,
+        return_loss: Optional[bool] = True,
     ):
         assert (
             len(pixel_values.shape) == 5
@@ -75,7 +78,10 @@ class SimCLR(BaseMethod):
         pixel_values = batch[0]
         metrics = {}
 
-        outputs = self.forward(pixel_values=pixel_values, return_loss=True,)
+        outputs = self.forward(
+            pixel_values=pixel_values,
+            return_loss=True,
+        )
 
         metrics["train/loss"] = outputs.loss
         self.log_dict(metrics, sync_dist=True, prog_bar=True)
@@ -99,13 +105,19 @@ class SimCLR(BaseMethod):
     def _shared_eval_step(self, batch, batch_idx):
         pixel_values = batch[0]
 
-        outputs = self.forward(pixel_values=pixel_values, return_loss=True,)
+        outputs = self.forward(
+            pixel_values=pixel_values,
+            return_loss=True,
+        )
 
         return outputs.loss
 
     def predict_step(self, batch, batch_idx):
         pixel_values = batch[0]
 
-        outputs = self.forward(pixel_values=pixel_values, return_loss=False,)
+        outputs = self.forward(
+            pixel_values=pixel_values,
+            return_loss=False,
+        )
 
         return outputs
