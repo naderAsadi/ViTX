@@ -1,5 +1,3 @@
-<h2 align="center">🚧 Under Development 🚧</h2>
-
 ## Overview
 
 **ViTX** is a **Vi**sion-**T**e**X**t representation learning framework on top of [PyTorch Lightning](https://www.pytorchlightning.ai/) and HuggingFace [Transformers](https://huggingface.co/) for Cross-Modal Perception research. It is designed to be readable and easily extensible, to allow users to quickly run and experiment with their own ideas.
@@ -43,27 +41,44 @@ pip install -e .
 ```
 
 
+## Code structure
+- `configs/`: Directory to store experiment  configurations, all in .yaml format.
+- `examples/`: Directory for example files showcasing the usage of the codebase.
+- `scripts/`: General purpose, single file scripts.
+- `vitx/`: The main source code
+  - `config/`: Data Classes and utility function to parse and sanity check YAML configs.
+  - `data/`: Classes for reading the data, transforming, and tokenizing it.
+  - `losses/`: Classes as `nn.Modules` holding the implementation of several loss functions. 
+  - `methods/`: Classes that contain the pipelines for each method, e.g. training and inference functions.
+  - `models/`: Model classes. e.g. CLIP, SLIP.
+  - `utils`: Utility functions.
+    
 ## How To Use
 
 With `vitx` you can use uni-modal and multi-modal self-supervised methods in a modular way using the full power of PyTorch. Experiment with different backbones, models and loss functions. The framework has been designed to be easy to use from the ground up.
 
 ### Quick Start
 
-```python
-
-```
-
-
-<details>
-  <summary>More training examples</summary>
   
-Train CLIP with ViT-base on COCO Captions dataset:
+Usage of `main.py` file:
 
+```shell
+python main.py \
+        data=<data_config_name> \
+        model/vision_model=<vision_model_config_name> \
+        model/text_model=<text_model_config_name> \
+        +arg=<value> \
+        ...
 ```
-python main.py data=coco model/vision_model=vit-b  model/text_model=vit-b
+
+Example:
+
+```shell
+python main.py \
+        data="coco" \
+        model/vision_model="vit-b" \
+        model/text_model="vit-b"
 ```
-  
-</details>
 
 ## Reading The Commits
 Here is a reference to what each emoji in the commits means:
